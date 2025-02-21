@@ -52,6 +52,19 @@ SuaGestão é uma aplicação web para simplificar a gestão de negócios, permi
 - **Lucide Icons**: Biblioteca de ícones.
 - **TypeScript**: Superset do JavaScript que adiciona tipagem estática.
 
+## Estrutura de Páginas
+
+- **Home**: Página inicial com informações sobre o produto e chamadas para ação.
+- **Login**: Página de login para usuários existentes.
+- **Register**: Página de registro para novos usuários.
+- **Dashboard**: Painel principal após o login, com acesso a todas as funcionalidades.
+- **Sales**: Página para gerenciamento de vendas.
+- **Inventory**: Página para controle de estoque.
+- **Reports**: Página para visualização de relatórios financeiros.
+- **Customers**: Página para gerenciamento de clientes.
+- **Suppliers**: Página para gerenciamento de fornecedores.
+- **Settings**: Página para configurações da conta e preferências.
+
 ## Como Executar o Projeto
 
 1. Clone o repositório:
