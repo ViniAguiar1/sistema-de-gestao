@@ -1,110 +1,170 @@
-# SuaGestão
+# SuaGestão - Sistema de Gestão para Representantes Comerciais
 
-SuaGestão é uma aplicação web para simplificar a gestão de negócios, permitindo o controle de vendas, estoque, finanças e muito mais.
+Sistema completo de gestão desenvolvido para representantes comerciais, oferecendo controle total de vendas, equipe, clientes e muito mais.
 
-## Funcionalidades
+![SuaGestão](https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426&ixlib=rb-4.0.3)
 
-- **Controle de Vendas**: Gerencie suas vendas com facilidade, emita notas fiscais e acompanhe o desempenho em tempo real.
-- **Gestão de Estoque**: Controle seu estoque, receba alertas de produtos baixos e faça pedidos automaticamente.
-- **Relatórios Financeiros**: Acompanhe receitas, despesas e lucros com relatórios detalhados e gráficos intuitivos.
-- **Controle de Clientes**: Mantenha um cadastro completo dos seus clientes e histórico de compras.
-- **Gestão de Fornecedores**: Organize seus fornecedores, pedidos e pagamentos em um só lugar.
-- **Fluxo de Caixa**: Controle entradas, saídas e tenha uma visão clara da saúde financeira do seu negócio.
+## 🚀 Funcionalidades
 
-## Planos
+### Gestão de Vendas
+- Dashboard com métricas em tempo real
+- Controle de pedidos e vendas
+- Gestão de promotores
+- Agenda integrada
+- Scripts de vendas personalizáveis
+- Gestão de leads
 
-### Iniciante
-- **Preço**: R$0/mês
-- **Descrição**: Perfeito para pequenos negócios
-- **Funcionalidades**:
-  - 14 dias de teste grátis
-  - Controle de vendas básico
-  - Até 100 produtos
-  - 1 usuário
-  - Suporte por email
+### Gestão de Equipe
+- Controle de promotores de vendas
+- Atribuição de territórios
+- Monitoramento de desempenho
+- Gestão de comissões
 
-### Profissional
-- **Preço**: R$97/mês
-- **Descrição**: Para negócios em crescimento
-- **Funcionalidades**:
-  - Tudo do plano Iniciante
-  - Produtos ilimitados
-  - Até 5 usuários
-  - Controle financeiro completo
-  - Relatórios avançados
-  - Suporte prioritário
+### Relatórios e Análises
+- Relatórios de vendas
+- Análise de desempenho
+- Métricas financeiras
+- Indicadores de performance
 
-### Empresarial
-- **Preço**: R$197/mês
-- **Descrição**: Para empresas estabelecidas
-- **Funcionalidades**:
-  - Tudo do plano Profissional
-  - Usuários ilimitados
-  - API disponível
-  - Suporte 24/7
-  - Treinamento personalizado
-  - Gestor de conta dedicado
+## 💻 Tecnologias
 
-## Tecnologias Utilizadas
+- [Next.js 13](https://nextjs.org/)
+- [React](https://reactjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Shadcn/ui](https://ui.shadcn.com/)
+- [Lucide Icons](https://lucide.dev/)
+- [Recharts](https://recharts.org/)
 
-- **Next.js**: Framework React para desenvolvimento de aplicações web.
-- **Tailwind CSS**: Framework CSS para estilização.
-- **Lucide Icons**: Biblioteca de ícones.
-- **TypeScript**: Superset do JavaScript que adiciona tipagem estática.
+## 🛠️ Instalação
 
-## Estrutura de Páginas
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/suagestao.git
 
-- **Home**: Página inicial com informações sobre o produto e chamadas para ação.
-- **Login**: Página de login para usuários existentes.
-- **Register**: Página de registro para novos usuários.
-- **Dashboard**: Painel principal após o login, com acesso a todas as funcionalidades.
-- **Sales**: Página para gerenciamento de vendas.
-- **Inventory**: Página para controle de estoque.
-- **Reports**: Página para visualização de relatórios financeiros.
-- **Customers**: Página para gerenciamento de clientes.
-- **Suppliers**: Página para gerenciamento de fornecedores.
-- **Settings**: Página para configurações da conta e preferências.
+# Entre no diretório
+cd suagestao
 
-## Como Executar o Projeto
+# Instale as dependências
+npm install
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/ViniAguiar1/sua-gestao.git
-   ```
-2. Navegue até o diretório do projeto:
-   ```bash
-   cd sua-gestao
-   ```
-3. Instale as dependências:
-   ```bash
-   npm install
-   ```
-4. Execute o projeto:
-   ```bash
-   npm run dev
-   ```
-5. Abra o navegador e acesse:
-   ```
-   http://localhost:3000
-   ```
+# Inicie o servidor de desenvolvimento
+npm run dev
+```
 
-## Contribuição
+## 👥 Usuários de Teste
 
-1. Faça um fork do projeto.
-2. Crie uma nova branch:
-   ```bash
-   git checkout -b minha-nova-funcionalidade
-   ```
-3. Faça as alterações desejadas e commit:
-   ```bash
-   git commit -m 'Adiciona nova funcionalidade'
-   ```
-4. Envie para o repositório remoto:
-   ```bash
-   git push origin minha-nova-funcionalidade
-   ```
-5. Abra um Pull Request.
+### Administrador
+- Email: admin@suagestao.com
+- Senha: admin123
+- Acesso total ao sistema
 
-## Licença
+### Representante
+- Email: joao.silva@empresa.com
+- Senha: rep123
+- Acesso às funcionalidades de gestão de vendas e equipe
 
-Este projeto está licenciado sob a Licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+### Promotor
+- Email: carlos.santos@empresa.com
+- Senha: promo123
+- Acesso limitado às suas atividades
+
+## 🔐 Controle de Acesso
+
+### Administrador
+- Acesso completo a todas as funcionalidades
+- Gerenciamento de usuários
+- Configurações do sistema
+
+### Representante
+- Gestão de vendas
+- Controle de promotores
+- Relatórios básicos
+- Agenda e leads
+
+### Promotor
+- Registro de visitas
+- Agenda pessoal
+- Cadastro de leads
+- Scripts de vendas
+
+## 📱 Módulos Principais
+
+### Dashboard
+- Visão geral do negócio
+- Métricas principais
+- Gráficos de desempenho
+- Alertas importantes
+
+### Vendas
+- Cadastro de pedidos
+- Acompanhamento de vendas
+- Histórico de transações
+- Metas e objetivos
+
+### Promotores
+- Cadastro de promotores
+- Atribuição de territórios
+- Metas individuais
+- Avaliação de desempenho
+
+### Agenda
+- Calendário de atividades
+- Agendamento de visitas
+- Compromissos comerciais
+- Sincronização com equipe
+
+### Scripts
+- Templates de abordagem
+- Roteiros de vendas
+- Questionários personalizados
+- Avaliação de efetividade
+
+### Leads
+- Cadastro de prospects
+- Funil de vendas
+- Histórico de contatos
+- Qualificação de leads
+
+## 📊 Relatórios
+
+- Vendas por período
+- Desempenho da equipe
+- Análise de território
+- Conversão de leads
+- Efetividade de scripts
+- Comissões e bonificações
+
+## 🔄 Fluxo de Trabalho
+
+1. **Cadastro de Leads**
+   - Identificação de prospects
+   - Qualificação inicial
+   - Atribuição a promotores
+
+2. **Agendamento**
+   - Marcação de visitas
+   - Definição de objetivos
+   - Preparação de material
+
+3. **Execução**
+   - Aplicação de scripts
+   - Registro de feedback
+   - Próximos passos
+
+4. **Acompanhamento**
+   - Registro de resultados
+   - Atualização de status
+   - Relatórios de performance
+
+## 📝 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## 🤝 Suporte
+
+Para suporte e dúvidas, entre em contato através do email: suporte@suagestao.com
+
+---
+
+Desenvolvido com ❤️ pela equipe SuaGestão

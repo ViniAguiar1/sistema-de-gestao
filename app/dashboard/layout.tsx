@@ -26,6 +26,10 @@ import {
   Settings,
   UserCog,
   Building,
+  Calendar,
+  UserCheck,
+  ScrollText,
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -64,6 +68,35 @@ const menuItems = [
     title: "Financeiro",
     icon: Wallet,
     href: "/dashboard/financeiro",
+  },
+];
+
+const vendasItems = [
+  {
+    title: "Gestão de Vendas",
+    icon: ShoppingCart,
+    items: [
+      {
+        title: "Promotores",
+        href: "/dashboard/promotores",
+        icon: UserCheck,
+      },
+      {
+        title: "Agenda",
+        href: "/dashboard/agenda",
+        icon: Calendar,
+      },
+      {
+        title: "Scripts",
+        href: "/dashboard/scripts",
+        icon: ScrollText,
+      },
+      {
+        title: "Leads",
+        href: "/dashboard/leads",
+        icon: Target,
+      },
+    ],
   },
 ];
 
@@ -186,6 +219,42 @@ export default function DashboardLayout({
                     {item.title}
                   </span>
                 </Link>
+              ))}
+
+              {/* Seção de Gestão de Vendas */}
+              <Separator className="my-4" />
+              {vendasItems.map((section, index) => (
+                <div key={index}>
+                  <button
+                    onClick={() => toggleSection('sales')}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
+                      collapsed && "justify-center"
+                    )}
+                  >
+                    <section.icon className="h-5 w-5" />
+                    <span className={cn("text-sm", collapsed && "hidden")}>
+                      {section.title}
+                    </span>
+                  </button>
+                  {!collapsed && openSection === 'sales' && (
+                    <div className="ml-4 mt-1 grid gap-1">
+                      {section.items.map((item, itemIndex) => (
+                        <Link
+                          key={itemIndex}
+                          href={item.href}
+                          className={cn(
+                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-500 transition-all hover:text-gray-900",
+                            pathname === item.href && "bg-gray-100 text-gray-900"
+                          )}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.title}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
 
               {/* Seção de Relatórios */}
