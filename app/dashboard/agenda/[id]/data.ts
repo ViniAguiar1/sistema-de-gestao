@@ -1,0 +1,32 @@
+export const compromissosData = [
+    {
+      id: 1,
+      titulo: "Reunião Cliente ABC",
+      data: "20/03/2025",
+      hora: "10:00",
+      tipo: "Visita",
+      cliente: "Empresa ABC Ltda",
+      endereco: "Av. Paulista, 1000 - São Paulo, SP",
+      descricao: "Apresentação da nova linha de produtos",
+    },
+    {
+      id: 2,
+      titulo: "Follow-up XYZ",
+      data: "20/03/2025",
+      hora: "14:30",
+      tipo: "Ligação",
+      cliente: "Distribuidora XYZ",
+      telefone: "(11) 98765-4321",
+      descricao: "Acompanhamento do último pedido",
+    },
+    {
+      id: 3,
+      titulo: "Apresentação Novos Produtos",
+      data: "21/03/2025",
+      hora: "09:00",
+      tipo: "Online",
+      cliente: "Comércio Sul",
+      link: "https://meet.google.com/abc-defg-hij",
+      descricao: "Demonstração da coleção 2025",
+    },
+  ];
