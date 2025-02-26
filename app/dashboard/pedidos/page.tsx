@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -10,8 +12,35 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, MoreHorizontal, Package, Building2, User } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Plus, Search, MoreHorizontal, Package, Building2, User, Eye, Pencil, Trash } from "lucide-react";
 import Link from "next/link";
+import { DatePickerWithRange } from "@/components/ui/date-range-picker";
+import { addDays } from "date-fns";
 
 const pedidos = [
   {
@@ -64,7 +93,7 @@ const pedidos = [
     representada: "Sinteplast",
     valor: 6300.00,
     itens: 4,
-    status: "Cancelado",
+    status: "Rascunho",
   },
 ];
 
@@ -72,9 +101,64 @@ const statusStyles = {
   Aprovado: "bg-emerald-100 text-emerald-800",
   Pendente: "bg-yellow-100 text-yellow-800",
   Cancelado: "bg-red-100 text-red-800",
+  Rascunho: "bg-gray-100 text-gray-800",
 };
 
+const representadas = [
+  { id: 1, nome: "Xalingo Brinquedos" },
+  { id: 2, nome: "Athia Heroes" },
+  { id: 3, nome: "Brasil Fit" },
+  { id: 4, nome: "Sinteplast" },
+  { id: 5, nome: "Patta" },
+];
+
 export default function PedidosPage() {
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRepresentada, setSelectedRepresentada] = useState<string | null>(null);
+  const [date, setDate] = useState({
+    from: new Date(),
+    to: addDays(new Date(), 30),
+  });
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const handleViewOrder = (orderId: string) => {
+    window.open(`/dashboard/pedidos/preview`, "_blank");
+  };
+
+  const handleEditOrder = (orderId: string) => {
+    router.push(`/dashboard/pedidos/${orderId}/editar`);
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    setDeleteLoading(true);
+    try {
+      // Aqui iria a lógica de deleção
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Atualizar a lista de pedidos
+    } catch (error) {
+      console.error("Erro ao excluir pedido:", error);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  // Filtrar pedidos
+  const filteredPedidos = pedidos.filter(pedido => {
+    const matchesSearch = 
+      pedido.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pedido.cliente.nome.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesRepresentada = 
+      !selectedRepresentada || 
+      pedido.representada === selectedRepresentada;
+
+    // Aqui você pode adicionar a lógica de filtro por data
+    // usando date.from e date.to
+
+    return matchesSearch && matchesRepresentada;
+  });
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
@@ -87,11 +171,33 @@ export default function PedidosPage() {
         </Link>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar pedidos..." className="pl-8" />
+          <Input 
+            placeholder="Buscar pedidos..." 
+            className="pl-8" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
+        <Select 
+          value={selectedRepresentada || "todas"} 
+          onValueChange={(value) => setSelectedRepresentada(value === "todas" ? null : value)}
+        >
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Todas as representadas" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todas">Todas as representadas</SelectItem>
+            {representadas.map((representada) => (
+              <SelectItem key={representada.id} value={representada.nome}>
+                {representada.nome}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <DatePickerWithRange date={date} setDate={setDate} />
       </div>
       
       <div className="rounded-lg border">
@@ -103,11 +209,11 @@ export default function PedidosPage() {
               <TableHead>Representada</TableHead>
               <TableHead>Valor</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {pedidos.map((pedido) => (
+            {filteredPedidos.map((pedido) => (
               <TableRow key={pedido.id}>
                 <TableCell>
                   <div>
@@ -154,9 +260,53 @@ export default function PedidosPage() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Button variant="ghost" size="icon">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleViewOrder(pedido.id)}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        Visualizar
+                      </DropdownMenuItem>
+                      {pedido.status === 'Rascunho' && (
+                        <>
+                          <DropdownMenuItem onClick={() => handleEditOrder(pedido.id)}>
+                            <Pencil className="h-4 w-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <Trash className="h-4 w-4 mr-2" />
+                                Excluir
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => handleDeleteOrder(pedido.id)}
+                                  disabled={deleteLoading}
+                                >
+                                  {deleteLoading ? "Excluindo..." : "Excluir"}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}

@@ -427,7 +427,7 @@ export default function NovoClientePage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="classificacaoSV">Classificação SV</Label>
+                  <Label htmlFor="classificacaoSV">Classificação</Label>
                   <Select>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione" />
