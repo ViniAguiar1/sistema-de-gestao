@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 import {
   ChevronLeft,
@@ -32,6 +33,9 @@ import {
   Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import IconOng from "@/assets/1x/icon.png";
+import logo from "@/assets/SVG/logo.svg";
+import { signOut } from "next-auth/react";
 
 const menuItems = [
   {
@@ -39,11 +43,11 @@ const menuItems = [
     icon: LayoutDashboard,
     href: "/dashboard",
   },
-  {
-    title: "Vendas",
-    icon: ShoppingCart,
-    href: "/dashboard/vendas",
-  },
+  // {
+  //   title: "Vendas",
+  //   icon: ShoppingCart,
+  //   href: "/dashboard/vendas",
+  // },
   {
     title: "Clientes",
     icon: Users,
@@ -61,7 +65,7 @@ const menuItems = [
   },
   {
     title: "Pedidos",
-    icon: ClipboardList,
+    icon: ShoppingCart,
     href: "/dashboard/pedidos",
   },
   {
@@ -161,6 +165,11 @@ export default function DashboardLayout({
     setOpenSection(openSection === section ? null : section);
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = "/login";
+  };
+
   return (
     <div className="min-h-screen bg-gray-100/40">
       {/* Header */}
@@ -174,12 +183,11 @@ export default function DashboardLayout({
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="flex items-center gap-2">
-            <Gem className="h-6 w-6" />
-            <span className={cn("font-semibold", collapsed && "md:hidden")}>
-              SuaGestão
-            </span>
+          <div className="flex items-center gap-2 justify-center">
+            <Image style={{ width: 120, height: 30}} src={logo} alt="SuaGestão Logo" className="h-6" />
+            {/* <img src={IconOng} alt="TAVRUS Logo" className="h-6" /> */}
           </div>
+
           <div className="ml-auto flex items-center gap-4">
             <Button variant="ghost" size="icon">
               <Bell className="h-5 w-5" />
@@ -320,6 +328,7 @@ export default function DashboardLayout({
                   "w-full justify-start gap-3 text-gray-500",
                   collapsed && "justify-center"
                 )}
+                onClick={handleLogout}
               >
                 <LogOut className="h-5 w-5" />
                 <span className={cn("text-sm", collapsed && "hidden")}>

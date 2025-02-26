@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -26,6 +27,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import logo from "@/assets/SVG/logo.svg"
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -71,8 +73,9 @@ export default function RegisterPage() {
           <CardHeader className="space-y-4">
             <div className="flex justify-center mb-4">
               <Link href="/" className="flex items-center">
-                <Gem className="h-8 w-8 text-primary" />
-                <span className="ml-2 text-2xl font-bold">SuaGestão</span>
+                {/* <Gem className="h-8 w-8 text-primary" />
+                <span className="ml-2 text-2xl font-bold">SuaGestão</span> */}
+                <Image style={{ width: 150, height: 100, marginBottom: -40}} src={logo} alt="SuaGestão Logo" className="h-6" />
               </Link>
             </div>
             <CardTitle className="text-3xl font-bold text-center">Crie sua conta grátis</CardTitle>

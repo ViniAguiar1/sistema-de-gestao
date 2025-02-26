@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -10,7 +12,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus, Search, MoreHorizontal, Package, Tag, Building2 } from "lucide-react";
+import Link from "next/link";
 
 const produtos = [
   {
@@ -65,6 +75,14 @@ const produtos = [
   },
 ];
 
+const representadas = [
+  { id: 1, nome: "Xalingo Brinquedos" },
+  { id: 2, nome: "Athia Heroes" },
+  { id: 3, nome: "Brasil Fit" },
+  { id: 4, nome: "Sinteplast" },
+  { id: 5, nome: "Patta" },
+];
+
 const statusStyles = {
   Ativo: "bg-emerald-100 text-emerald-800",
   "Baixo Estoque": "bg-yellow-100 text-yellow-800",
@@ -72,21 +90,61 @@ const statusStyles = {
 };
 
 export default function ProdutosPage() {
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRepresentada, setSelectedRepresentada] = useState<string | null>(null);
+
+  // Filter products based on search term and selected representada
+  const filteredProdutos = produtos.filter(produto => {
+    const matchesSearch = 
+      produto.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      produto.nome.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesRepresentada = 
+      !selectedRepresentada || 
+      produto.representada === selectedRepresentada;
+
+    return matchesSearch && matchesRepresentada;
+  });
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Produtos</h2>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Novo Produto
-        </Button>
+        <Link href="/dashboard/produtos/novo">
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            Novo Produto
+          </Button>
+        </Link>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar produtos..." className="pl-8" />
+          <Input 
+            placeholder="Buscar produtos..." 
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
+        <Select 
+          value={selectedRepresentada || "todas"} 
+          onValueChange={(value) => setSelectedRepresentada(value === "todas" ? null : value)}
+        >
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Todas as representadas" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todas">Todas as representadas</SelectItem>
+            {representadas.map((representada) => (
+              <SelectItem key={representada.id} value={representada.nome}>
+                {representada.nome}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       
       <div className="rounded-lg border">
@@ -102,7 +160,7 @@ export default function ProdutosPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {produtos.map((produto) => (
+            {filteredProdutos.map((produto) => (
               <TableRow key={produto.id}>
                 <TableCell>
                   <div>
