@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -11,6 +12,26 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, MoreHorizontal, Phone, Mail, MapPin } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const representadas = [
   {
@@ -71,14 +92,32 @@ const representadas = [
 ];
 
 export default function RepresentadasPage() {
+  const router = useRouter();
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const handleDelete = async (id: number) => {
+    setDeleteLoading(true);
+    try {
+      // Aqui vai a lógica de deleção
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Atualizar a lista
+    } catch (error) {
+      console.error("Erro ao excluir representada:", error);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Representadas</h2>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Nova Representada
-        </Button>
+        <Link href="/dashboard/representadas/novo">
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            Nova Representada
+          </Button>
+        </Link>
       </div>
 
       <div className="flex items-center gap-2">
@@ -96,7 +135,7 @@ export default function RepresentadasPage() {
               <TableHead>Segmento</TableHead>
               <TableHead>Contato</TableHead>
               <TableHead>Comissão</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -133,9 +172,53 @@ export default function RepresentadasPage() {
                   <div className="font-medium">{representada.comissao}%</div>
                 </TableCell>
                 <TableCell>
-                  <Button variant="ghost" size="icon">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem 
+                        onClick={() => router.push(`/dashboard/representadas/${representada.id}`)}
+                      >
+                        Ver detalhes
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => router.push(`/dashboard/representadas/${representada.id}/editar`)}
+                      >
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem 
+                            className="text-red-600"
+                            onSelect={(e) => e.preventDefault()}
+                          >
+                            Excluir
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja excluir esta representada? Esta ação não pode ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => handleDelete(representada.id)}
+                              disabled={deleteLoading}
+                            >
+                              {deleteLoading ? "Excluindo..." : "Excluir"}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
