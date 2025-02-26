@@ -3,6 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2, Gem, Star } from "lucide-react";
 import Link from "next/link";
+import logo from "@/assets/SVG/logo.svg"
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -12,8 +14,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
-              <Gem className="h-8 w-8 text-primary" />
-              <span className="ml-2 text-xl font-bold">SuaGestão</span>
+              <Image style={{ width: 150, height: 100 }} src={logo} alt="SuaGestão Logo" className="h-6" />
             </div>
             <div className="flex items-center space-x-4">
               <Link href="/login">
@@ -123,10 +124,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <Gem className="h-6 w-6 text-primary" />
-              <span className="ml-2 text-lg font-semibold">SuaGestão</span>
+            <Image style={{ width: 150 }} src={logo} alt="SuaGestão Logo" className="h-6" />
             </div>
-            <p className="text-sm text-gray-500">© 2024 SuaGestão. Todos os direitos reservados.</p>
+            <p className="text-sm text-gray-500">© 2024 Tavrus. Todos os direitos reservados.</p>
           </div>
         </div>
       </footer>
