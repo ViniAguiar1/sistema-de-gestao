@@ -31,30 +31,17 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const response = await fetch("http://192.168.15.35:6005/api/usuarios/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        senha: password,
-      }),
-    });
+    // Simulate successful login
+    const data = {
+      token: "fake-token",
+    };
 
-    const data = await response.json();
-
-    if (response.ok) {
-      // Salva o token no localStorage
-      localStorage.setItem("token", data.token);
-      // Exibe notificação de sucesso
-      toast.success("Login realizado com sucesso!");
-      // Redireciona para a página do dashboard
-      router.push("/dashboard");
-    } else {
-      // Exibe notificação de erro
-      toast.error(data.mensagem || "Erro ao autenticar");
-    }
+    // Salva o token no localStorage
+    localStorage.setItem("token", data.token);
+    // Exibe notificação de sucesso
+    toast.success("Login realizado com sucesso!");
+    // Redireciona para a página do dashboard
+    router.push("/dashboard");
   };
 
   return (

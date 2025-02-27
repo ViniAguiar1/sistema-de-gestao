@@ -9,8 +9,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Plus, Clock, MapPin, Users } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 const eventos = [
   {
@@ -54,15 +73,147 @@ const statusStyles = {
 
 export default function AgendaPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [isNewEventOpen, setIsNewEventOpen] = useState(false);
+  const [newEvent, setNewEvent] = useState({
+    titulo: "",
+    tipo: "",
+    data: "",
+    hora: "",
+    local: "",
+    cliente: "",
+    descricao: "",
+  });
+
+  const handleCreateEvent = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Aqui você implementaria a lógica para salvar o evento
+    console.log("Novo evento:", newEvent);
+    setIsNewEventOpen(false);
+    // Limpar o formulário
+    setNewEvent({
+      titulo: "",
+      tipo: "",
+      data: "",
+      hora: "",
+      local: "",
+      cliente: "",
+      descricao: "",
+    });
+  };
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Agenda</h2>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Novo Evento
-        </Button>
+        <Dialog open={isNewEventOpen} onOpenChange={setIsNewEventOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Novo Evento
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px]">
+            <form onSubmit={handleCreateEvent}>
+              <DialogHeader>
+                <DialogTitle>Novo Evento</DialogTitle>
+                <DialogDescription>
+                  Preencha os detalhes do novo evento
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="titulo">Título</Label>
+                    <Input
+                      id="titulo"
+                      placeholder="Título do evento"
+                      value={newEvent.titulo}
+                      onChange={(e) => setNewEvent({ ...newEvent, titulo: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="tipo">Tipo</Label>
+                    <Select
+                      value={newEvent.tipo}
+                      onValueChange={(value) => setNewEvent({ ...newEvent, tipo: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="visita">Visita</SelectItem>
+                        <SelectItem value="ligacao">Ligação</SelectItem>
+                        <SelectItem value="reuniao">Reunião</SelectItem>
+                        <SelectItem value="apresentacao">Apresentação</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cliente">Cliente</Label>
+                    <Input
+                      id="cliente"
+                      placeholder="Nome do cliente"
+                      value={newEvent.cliente}
+                      onChange={(e) => setNewEvent({ ...newEvent, cliente: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="data">Data</Label>
+                    <Input
+                      id="data"
+                      type="date"
+                      value={newEvent.data}
+                      onChange={(e) => setNewEvent({ ...newEvent, data: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="hora">Hora</Label>
+                    <Input
+                      id="hora"
+                      type="time"
+                      value={newEvent.hora}
+                      onChange={(e) => setNewEvent({ ...newEvent, hora: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="local">Local</Label>
+                  <Input
+                    id="local"
+                    placeholder="Local do evento"
+                    value={newEvent.local}
+                    onChange={(e) => setNewEvent({ ...newEvent, local: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="descricao">Descrição</Label>
+                  <Textarea
+                    id="descricao"
+                    placeholder="Descrição do evento"
+                    value={newEvent.descricao}
+                    onChange={(e) => setNewEvent({ ...newEvent, descricao: e.target.value })}
+                    className="min-h-[100px]"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsNewEventOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit">Salvar Evento</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">

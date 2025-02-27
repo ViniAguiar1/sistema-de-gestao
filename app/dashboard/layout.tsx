@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import {
   User,
   FileText,
   Package,
+  DollarSign,
   ClipboardList,
   Boxes,
   Cable,
@@ -30,11 +31,11 @@ import {
   UserCheck,
   ScrollText,
   Target,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import IconOng from "@/assets/1x/icon.png";
 import logo from "@/assets/SVG/logo.svg";
-import { signOut } from "next-auth/react";
 
 const menuItems = [
   {
@@ -42,6 +43,11 @@ const menuItems = [
     icon: LayoutDashboard,
     href: "/dashboard",
   },
+  // {
+  //   title: "Vendas",
+  //   icon: ShoppingCart,
+  //   href: "/dashboard/vendas",
+  // },
   {
     title: "Clientes",
     icon: Users,
@@ -56,6 +62,11 @@ const menuItems = [
     title: "Produtos",
     icon: Package,
     href: "/dashboard/produtos",
+  },
+  {
+    title: "Catálogo",
+    icon: BookOpen,
+    href: "/dashboard/catalogo",
   },
   {
     title: "Pedidos",
@@ -153,7 +164,6 @@ export default function DashboardLayout({
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>("main");
-  const [username, setUsername] = useState("");
   const pathname = usePathname();
 
   const toggleSection = (section: string) => {
@@ -164,21 +174,6 @@ export default function DashboardLayout({
     localStorage.clear();
     window.location.href = "/login";
   };
-
-  useEffect(() => {
-    // Recupera o token do localStorage
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      // Decriptografa e analisa o conteúdo JSON do token
-      try {
-        const parsedToken = JSON.parse(atob(token.split('.')[1])); // Supondo que seja um JWT, onde a parte payload está no meio
-        setUsername(parsedToken.nome); // Acessa o campo nome
-      } catch (error) {
-        console.error("Erro ao decriptografar o token", error);
-      }
-    }
-  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100/40">
@@ -195,6 +190,7 @@ export default function DashboardLayout({
           </Button>
           <div className="flex items-center gap-2 justify-center">
             <Image style={{ width: 120, height: 30}} src={logo} alt="SuaGestão Logo" className="h-6" />
+            {/* <img src={IconOng} alt="TAVRUS Logo" className="h-6" /> */}
           </div>
 
           <div className="ml-auto flex items-center gap-4">
@@ -204,7 +200,7 @@ export default function DashboardLayout({
             <Separator orientation="vertical" className="h-6" />
             <Button variant="ghost" size="sm" className="gap-2">
               <User className="h-5 w-5" />
-              <span className="hidden md:inline-block">{username || "Usuário"}</span>
+              <span className="hidden md:inline-block">João Silva</span>
             </Button>
           </div>
         </div>
