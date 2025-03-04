@@ -48,6 +48,11 @@ const menuItems = [
     icon: Wallet,
     href: "/dashboard/financeiro",
   },
+  {
+    title: "Mensalidades",
+    icon: DollarSign,
+    href: "/dashboard/mensalidades",
+  },
 ];
 
 const vendasItems = [
