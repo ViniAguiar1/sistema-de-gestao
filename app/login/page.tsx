@@ -31,17 +31,30 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Simulate successful login
-    const data = {
-      token: "fake-token",
-    };
+    const response = await fetch("https://apicloud.tavrus.com.br/api/usuarios/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        senha: password,
+      }),
+    });
 
-    // Salva o token no localStorage
-    localStorage.setItem("token", data.token);
-    // Exibe notificação de sucesso
-    toast.success("Login realizado com sucesso!");
-    // Redireciona para a página do dashboard
-    router.push("/dashboard");
+    const data = await response.json();
+
+    if (response.ok) {
+      // Salva o token no localStorage
+      localStorage.setItem("token", data.token);
+      // Exibe notificação de sucesso
+      toast.success("Login realizado com sucesso!");
+      // Redireciona para a página do dashboard
+      router.push("/dashboard");
+    } else {
+      // Exibe notificação de erro
+      toast.error(data.mensagem || "Erro ao autenticar");
+    }
   };
 
   return (

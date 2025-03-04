@@ -1,41 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
-import {
-  ChevronLeft,
-  LayoutDashboard,
-  Users,
-  ShoppingCart,
-  Building2,
-  Wallet,
-  LogOut,
-  Menu,
-  Gem,
-  Bell,
-  User,
-  FileText,
-  Package,
-  DollarSign,
-  ClipboardList,
-  Boxes,
-  Cable,
-  Settings,
-  UserCog,
-  Building,
-  Calendar,
-  UserCheck,
-  ScrollText,
-  Target,
-  BookOpen,
-} from "lucide-react";
+import { ChevronLeft, LayoutDashboard, Users, ShoppingCart, Building2, Wallet, LogOut, Menu, Gem, Bell, User, FileText, Package, DollarSign, ClipboardList, Boxes, Cable, Settings, UserCog, Building, Calendar, UserCheck, ScrollText, Target, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import IconOng from "@/assets/1x/icon.png";
 import logo from "@/assets/SVG/logo.svg";
+import {jwtDecode} from "jwt-decode"; // Importar a biblioteca jwt-decode
 
 const menuItems = [
   {
@@ -43,11 +18,6 @@ const menuItems = [
     icon: LayoutDashboard,
     href: "/dashboard",
   },
-  // {
-  //   title: "Vendas",
-  //   icon: ShoppingCart,
-  //   href: "/dashboard/vendas",
-  // },
   {
     title: "Clientes",
     icon: Users,
@@ -164,7 +134,21 @@ export default function DashboardLayout({
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>("main");
+  const [userName, setUserName] = useState<string | null>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    // Recupera o token armazenado no localStorage
+    const token = localStorage.getItem("token");
+    
+    if (token) {
+      // Decodifica o token para obter as informações do usuário
+      const decodedToken: any = jwtDecode(token);
+      
+      // Extrai o nome do usuário do payload do token
+      setUserName(decodedToken?.nome || "Usuário");
+    }
+  }, []);
 
   const toggleSection = (section: string) => {
     setOpenSection(openSection === section ? null : section);
@@ -189,8 +173,7 @@ export default function DashboardLayout({
             <Menu className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-2 justify-center">
-            <Image style={{ width: 120, height: 30}} src={logo} alt="SuaGestão Logo" className="h-6" />
-            {/* <img src={IconOng} alt="TAVRUS Logo" className="h-6" /> */}
+            <Image style={{ width: 120, height: 30 }} src={logo} alt="SuaGestão Logo" className="h-6" />
           </div>
 
           <div className="ml-auto flex items-center gap-4">
@@ -200,7 +183,7 @@ export default function DashboardLayout({
             <Separator orientation="vertical" className="h-6" />
             <Button variant="ghost" size="sm" className="gap-2">
               <User className="h-5 w-5" />
-              <span className="hidden md:inline-block">João Silva</span>
+              <span className="hidden md:inline-block">{userName || "Carregando..."}</span>
             </Button>
           </div>
         </div>
