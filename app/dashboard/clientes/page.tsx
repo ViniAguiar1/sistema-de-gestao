@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -14,41 +15,49 @@ import { Plus, Search, MoreHorizontal, Phone, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const clientes = [
-  {
-    id: 1,
-    nome: "Empresa ABC Ltda",
-    contato: "João Silva",
-    telefone: "(11) 98765-4321",
-    email: "joao.silva@abc.com",
-    cidade: "São Paulo",
-    estado: "SP",
-    status: "Ativo",
-  },
-  {
-    id: 2,
-    nome: "Distribuidora XYZ",
-    contato: "Maria Santos",
-    telefone: "(21) 97654-3210",
-    email: "maria@xyz.com",
-    cidade: "Rio de Janeiro",
-    estado: "RJ",
-    status: "Ativo",
-  },
-  {
-    id: 3,
-    nome: "Comércio Sul",
-    contato: "Pedro Oliveira",
-    telefone: "(51) 96543-2109",
-    email: "pedro@sul.com",
-    cidade: "Porto Alegre",
-    estado: "RS",
-    status: "Inativo",
-  },
-];
+interface Cliente {
+  codigo: number;
+  nomeFantasia: string;
+  telefonePrincipal: string | null;
+  emailPrincipal: string | null;
+  status: string;
+}
 
 export default function ClientesPage() {
+  const [clientes, setClientes] = useState<Cliente[]>([]);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchClientes = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
+      try {
+        const response = await fetch("https://apicloud.tavrus.com.br/api/empresas-pessoas", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch clients");
+        }
+
+        const data = await response.json();
+        setClientes(data);
+      } catch (error) {
+        console.error("Error fetching clients:", error);
+      }
+    };
+
+    fetchClientes();
+  }, [router]);
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
@@ -75,31 +84,29 @@ export default function ClientesPage() {
             <TableRow>
               <TableHead>Cliente</TableHead>
               <TableHead>Contato</TableHead>
-              <TableHead>Cidade/UF</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {clientes.map((cliente) => (
-              <TableRow key={cliente.id}>
+              <TableRow key={cliente.codigo}>
                 <TableCell>
                   <div>
-                    <p className="font-medium">{cliente.nome}</p>
+                    <p className="font-medium">{cliente.nomeFantasia}</p>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                       <div className="flex items-center gap-1">
                         <Phone className="h-3 w-3" />
-                        {cliente.telefone}
+                        {cliente.telefonePrincipal ?? "N/A"}
                       </div>
                       <div className="flex items-center gap-1">
                         <Mail className="h-3 w-3" />
-                        {cliente.email}
+                        {cliente.emailPrincipal ?? "N/A"}
                       </div>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>{cliente.contato}</TableCell>
-                <TableCell>{cliente.cidade}/{cliente.estado}</TableCell>
+                <TableCell>{cliente.telefonePrincipal ?? "N/A"}</TableCell>
                 <TableCell>
                   <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                     cliente.status === 'Ativo' 
@@ -114,7 +121,7 @@ export default function ClientesPage() {
                     <Button 
                       variant="ghost" 
                       size="icon"
-                      onClick={() => router.push(`/dashboard/clientes/${cliente.id}`)}
+                      onClick={() => router.push(`/dashboard/clientes/${cliente.codigo}`)}
                     >
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
