@@ -106,25 +106,27 @@ const relatoriosItems = [
 
 const configItems = [
   {
-    title: "Integrações",
-    icon: Cable,
-    href: "/dashboard/integracoes",
-  },
-  {
-    title: "Usuários",
-    icon: UserCog,
-    href: "/dashboard/usuarios",
-  },
-  {
-    title: "Empresas",
-    icon: Building,
-    href: "/dashboard/empresas",
-  },
-  {
     title: "Configurações",
     icon: Settings,
-    href: "/dashboard/configuracoes",
-  },
+    items: [
+      {
+        title: "Integrações",
+        href: "/dashboard/integracoes",
+      },
+      {
+        title: "Usuários",
+        href: "/dashboard/usuarios",
+      },
+      {
+        title: "Empresas",
+        href: "/dashboard/empresas",
+      },
+      {
+        title: "Configurações",
+        href: "/dashboard/configuracoes",
+      },
+    ]
+  }
 ];
 
 export default function DashboardLayout({
@@ -157,6 +159,48 @@ export default function DashboardLayout({
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = "/login";
+  };
+
+  const renderMenuItems = (items: any[], section: string | null = null) => {
+    return items.map((item, index) => (
+      <div key={index}>
+        {item.items ? (
+          <>
+            <button
+              onClick={() => toggleSection(section || item.title)}
+              className={cn(
+                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
+                collapsed && "justify-center"
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              <span className={cn("text-sm", collapsed && "hidden")}>
+                {item.title}
+              </span>
+            </button>
+            {!collapsed && openSection === (section || item.title) && (
+              <div className="ml-4 mt-1 grid gap-1">
+                {renderMenuItems(item.items, section || item.title)}
+              </div>
+            )}
+          </>
+        ) : (
+          <Link
+            href={item.href}
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
+              pathname === item.href && "bg-gray-100 text-gray-900",
+              collapsed && "justify-center"
+            )}
+          >
+            {item.icon && <item.icon className="h-5 w-5" />}
+            <span className={cn("text-sm", collapsed && "hidden")}>
+              {item.title}
+            </span>
+          </Link>
+        )}
+      </div>
+    ));
   };
 
   return (
@@ -197,115 +241,22 @@ export default function DashboardLayout({
             collapsed && "w-16"
           )}
         >
-          <div className="flex h-full flex-col gap-4 py-4">
+          <div className="flex h-full flex-col gap-4 py-4 overflow-y-auto custom-scrollbar">
             <nav className="grid gap-1 px-2">
               {/* Menu Principal */}
-              {menuItems.map((item, index) => (
-                <Link
-                  key={index}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
-                    pathname === item.href && "bg-gray-100 text-gray-900",
-                    collapsed && "justify-center"
-                  )}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span className={cn("text-sm", collapsed && "hidden")}>
-                    {item.title}
-                  </span>
-                </Link>
-              ))}
+              {renderMenuItems(menuItems)}
 
               {/* Seção de Gestão de Vendas */}
               <Separator className="my-4" />
-              {vendasItems.map((section, index) => (
-                <div key={index}>
-                  <button
-                    onClick={() => toggleSection('sales')}
-                    className={cn(
-                      "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
-                      collapsed && "justify-center"
-                    )}
-                  >
-                    <section.icon className="h-5 w-5" />
-                    <span className={cn("text-sm", collapsed && "hidden")}>
-                      {section.title}
-                    </span>
-                  </button>
-                  {!collapsed && openSection === 'sales' && (
-                    <div className="ml-4 mt-1 grid gap-1">
-                      {section.items.map((item, itemIndex) => (
-                        <Link
-                          key={itemIndex}
-                          href={item.href}
-                          className={cn(
-                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-500 transition-all hover:text-gray-900",
-                            pathname === item.href && "bg-gray-100 text-gray-900"
-                          )}
-                        >
-                          <item.icon className="h-4 w-4" />
-                          {item.title}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+              {renderMenuItems(vendasItems, 'sales')}
 
               {/* Seção de Relatórios */}
               <Separator className="my-4" />
-              {relatoriosItems.map((section, index) => (
-                <div key={index}>
-                  <button
-                    onClick={() => toggleSection('reports')}
-                    className={cn(
-                      "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
-                      collapsed && "justify-center"
-                    )}
-                  >
-                    <section.icon className="h-5 w-5" />
-                    <span className={cn("text-sm", collapsed && "hidden")}>
-                      {section.title}
-                    </span>
-                  </button>
-                  {!collapsed && openSection === 'reports' && (
-                    <div className="ml-4 mt-1 grid gap-1">
-                      {section.items.map((item, itemIndex) => (
-                        <Link
-                          key={itemIndex}
-                          href={item.href}
-                          className={cn(
-                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-500 transition-all hover:text-gray-900",
-                            pathname === item.href && "bg-gray-100 text-gray-900"
-                          )}
-                        >
-                          {item.title}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+              {renderMenuItems(relatoriosItems, 'reports')}
 
               {/* Configurações e Integrações */}
               <Separator className="my-4" />
-              {configItems.map((item, index) => (
-                <Link
-                  key={index}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
-                    pathname === item.href && "bg-gray-100 text-gray-900",
-                    collapsed && "justify-center"
-                  )}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span className={cn("text-sm", collapsed && "hidden")}>
-                    {item.title}
-                  </span>
-                </Link>
-              ))}
+              {renderMenuItems(configItems)}
             </nav>
 
             <div className="mt-auto px-2">
@@ -337,6 +288,22 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
+
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #888;
+          border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #555;
+        }
+      `}</style>
     </div>
   );
 }
