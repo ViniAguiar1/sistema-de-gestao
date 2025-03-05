@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -33,67 +33,41 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const representadas = [
-  {
-    id: 1,
-    nome: "Xalingo Brinquedos",
-    segmento: "Brinquedos",
-    contato: "Roberto Santos",
-    telefone: "(51) 3456-7890",
-    email: "comercial@xalingo.com.br",
-    cidade: "Santa Cruz do Sul",
-    estado: "RS",
-    comissao: 8,
-  },
-  {
-    id: 2,
-    nome: "Athia Heroes",
-    segmento: "Games e Entretenimento",
-    contato: "Patricia Lima",
-    telefone: "(11) 3456-7890",
-    email: "vendas@athia.com.br",
-    cidade: "São Paulo",
-    estado: "SP",
-    comissao: 10,
-  },
-  {
-    id: 3,
-    nome: "Brasil Fit",
-    segmento: "Equipamentos Esportivos",
-    contato: "Marcos Oliveira",
-    telefone: "(41) 3456-7890",
-    email: "comercial@brasilfit.com.br",
-    cidade: "Curitiba",
-    estado: "PR",
-    comissao: 12,
-  },
-  {
-    id: 4,
-    nome: "Sinteplast",
-    segmento: "Tintas e Revestimentos",
-    contato: "Carla Silva",
-    telefone: "(31) 3456-7890",
-    email: "vendas@sinteplast.com.br",
-    cidade: "Belo Horizonte",
-    estado: "MG",
-    comissao: 7,
-  },
-  {
-    id: 5,
-    nome: "Patta",
-    segmento: "Calçados",
-    contato: "Fernando Costa",
-    telefone: "(54) 3456-7890",
-    email: "comercial@patta.com.br",
-    cidade: "Novo Hamburgo",
-    estado: "RS",
-    comissao: 9,
-  },
-];
-
 export default function RepresentadasPage() {
   const router = useRouter();
   const [deleteLoading, setDeleteLoading] = useState(false);
+  interface Representada {
+    codigoREPRESENTADA: number;
+    nomeFantasiaREPRESENTADA: string;
+    cidadeREPRESENTADA: string;
+    estadoREPRESENTADA: string;
+    segmentoREPRESENTADA: string;
+    razaoSocialREPRESENTADA: string;
+    telefonePrincipalREPRESENTADA: string;
+    emailREPRESENTADA: string;
+  }
+
+  const [representadas, setRepresentadas] = useState<Representada[]>([]);
+
+  useEffect(() => {
+    const fetchRepresentadas = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const response = await fetch("https://apicloud.tavrus.com.br/api/representadas", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        setRepresentadas(data);
+      } catch (error) {
+        console.error("Erro ao buscar representadas:", error);
+      }
+    };
+
+    fetchRepresentadas();
+  }, []);
 
   const handleDelete = async (id: number) => {
     setDeleteLoading(true);
@@ -101,6 +75,7 @@ export default function RepresentadasPage() {
       // Aqui vai a lógica de deleção
       await new Promise(resolve => setTimeout(resolve, 1000));
       // Atualizar a lista
+      setRepresentadas(prev => prev.filter(rep => rep.codigoREPRESENTADA !== id));
     } catch (error) {
       console.error("Erro ao excluir representada:", error);
     } finally {
@@ -140,36 +115,36 @@ export default function RepresentadasPage() {
           </TableHeader>
           <TableBody>
             {representadas.map((representada) => (
-              <TableRow key={representada.id}>
+              <TableRow key={representada.codigoREPRESENTADA}>
                 <TableCell>
                   <div>
-                    <p className="font-medium">{representada.nome}</p>
+                    <p className="font-medium">{representada.nomeFantasiaREPRESENTADA}</p>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                       <div className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
-                        {representada.cidade}/{representada.estado}
+                        {representada.cidadeREPRESENTADA}/{representada.estadoREPRESENTADA}
                       </div>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>{representada.segmento}</TableCell>
+                <TableCell>{representada.segmentoREPRESENTADA}</TableCell>
                 <TableCell>
                   <div>
-                    <p>{representada.contato}</p>
+                    <p>{representada.razaoSocialREPRESENTADA}</p>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                       <div className="flex items-center gap-1">
                         <Phone className="h-3 w-3" />
-                        {representada.telefone}
+                        {representada.telefonePrincipalREPRESENTADA}
                       </div>
                       <div className="flex items-center gap-1">
                         <Mail className="h-3 w-3" />
-                        {representada.email}
+                        {representada.emailREPRESENTADA}
                       </div>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="font-medium">{representada.comissao}%</div>
+                  <div className="font-medium">N/A</div>
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
@@ -180,12 +155,12 @@ export default function RepresentadasPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem 
-                        onClick={() => router.push(`/dashboard/representadas/${representada.id}`)}
+                        onClick={() => router.push(`/dashboard/representadas/${representada.codigoREPRESENTADA}`)}
                       >
                         Ver detalhes
                       </DropdownMenuItem>
                       <DropdownMenuItem 
-                        onClick={() => router.push(`/dashboard/representadas/${representada.id}/editar`)}
+                        onClick={() => router.push(`/dashboard/representadas/${representada.codigoREPRESENTADA}/editar`)}
                       >
                         Editar
                       </DropdownMenuItem>
@@ -209,7 +184,7 @@ export default function RepresentadasPage() {
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
                             <AlertDialogAction 
-                              onClick={() => handleDelete(representada.id)}
+                              onClick={() => handleDelete(representada.codigoREPRESENTADA)}
                               disabled={deleteLoading}
                             >
                               {deleteLoading ? "Excluindo..." : "Excluir"}
