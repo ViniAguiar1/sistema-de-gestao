@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'SuaGestão - Sistema de Gestão para Representantes',
+  title: 'Tavrus - Sistema de Gestão para Representantes',
   description: 'Sistema completo de gestão para representantes comerciais',
 };
 
