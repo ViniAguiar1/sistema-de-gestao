@@ -32,6 +32,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function RepresentadasPage() {
   const router = useRouter();
@@ -71,13 +73,23 @@ export default function RepresentadasPage() {
 
   const handleDelete = async (id: number) => {
     setDeleteLoading(true);
+    const token = localStorage.getItem("token");
     try {
-      // Aqui vai a lógica de deleção
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch(`https://apicloud.tavrus.com.br/api/representadas/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Erro ao excluir representada");
+      }
       // Atualizar a lista
       setRepresentadas(prev => prev.filter(rep => rep.codigoREPRESENTADA !== id));
+      toast.success("Representada excluída com sucesso!");
     } catch (error) {
       console.error("Erro ao excluir representada:", error);
+      toast.error("Erro ao excluir representada.");
     } finally {
       setDeleteLoading(false);
     }
@@ -85,6 +97,7 @@ export default function RepresentadasPage() {
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
+      <ToastContainer />
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Representadas</h2>
         <Link href="/dashboard/representadas/novo">
