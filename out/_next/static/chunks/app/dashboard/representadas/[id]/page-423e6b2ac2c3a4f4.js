@@ -1,4 +1,4 @@
-(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[4853],{73067:function(e,s,a){"use strict";a.d(s,{Z:function(){return r}});var t=a(65531);/**
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[5926],{73067:function(e,s,a){"use strict";a.d(s,{Z:function(){return r}});var t=a(65531);/**
  * @license lucide-react v0.446.0 - ISC
  *
  * This source code is licensed under the ISC license.
