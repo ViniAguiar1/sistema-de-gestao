@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,15 +35,89 @@ import {
   CreditCard,
   FileText
 } from "lucide-react";
-import { representadasData } from "./data";
 
 export function RepresentadaDetalhes() {
   const router = useRouter();
   const params = useParams();
   const representadaId = Number(params.id);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  
+  interface Representada {
+    razaoSocial: string;
+    nomeFantasia: string;
+    cnpj: string;
+    inscricaoEstadual: string;
+    segmento: string;
+    condicoesPagamento: { nome: string; desconto: number }[];
+    formasPagamento: { nome: string }[];
+    tabelasPreco: { nome: string; desconto: number; comissao: number }[];
+    endereco: string;
+    numero: string;
+    complemento: string | null;
+    bairro: string;
+    cep: string;
+    cidade: string;
+    estado: string;
+    telefone: string;
+    fax: string | null;
+    telefoneAdicional: string | null;
+    email: string;
+    emailFinanceiro: string;
+    website: string;
+    instagram: string;
+    facebook: string;
+    observacoes: string | null;
+  }
 
-  const representada = representadasData.find(r => r.id === representadaId);
+  const [representada, setRepresentada] = useState<Representada | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRepresentada = async () => {
+      const token = localStorage.getItem('token');
+      try {
+        const response = await fetch(`https://apicloud.tavrus.com.br/api/representadas/${representadaId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        setRepresentada({
+          razaoSocial: data.razaoSocialREPRESENTADA,
+          nomeFantasia: data.nomeFantasiaREPRESENTADA,
+          cnpj: data.cnpjREPRESENTADA,
+          inscricaoEstadual: data.inscricaoEstadualREPRESENTADA,
+          segmento: data.segmentoREPRESENTADA,
+          condicoesPagamento: data.CondicaoPagamentoRepresentadas || [],
+          formasPagamento: data.formasPagamento || [],
+          tabelasPreco: data.TabelaPrecoRepresentadas || [],
+          endereco: data.enderecoREPRESENTADA,
+          numero: data.numeroREPRESENTADA,
+          complemento: data.complementoREPRESENTADA,
+          bairro: data.bairroREPRESENTADA,
+          cep: data.cepREPRESENTADA,
+          cidade: data.cidadeREPRESENTADA,
+          estado: data.estadoREPRESENTADA,
+          telefone: data.telefonePrincipalREPRESENTADA,
+          fax: data.faxREPRESENTADA,
+          telefoneAdicional: data.telefoneAdicionalREPRESENTADA,
+          email: data.emailREPRESENTADA,
+          emailFinanceiro: data.emailFinanceiroREPRESENTADA,
+          website: data.websiteREPRESENTADA,
+          instagram: data.instagramREPRESENTADA,
+          facebook: data.facebookREPRESENTADA,
+          observacoes: data.observacoesREPRESENTADA,
+        });
+      } catch (error) {
+        console.error('Erro ao buscar representada:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRepresentada();
+  }, [representadaId]);
 
   const handleDelete = async () => {
     setDeleteLoading(true);
@@ -57,6 +131,14 @@ export function RepresentadaDetalhes() {
       setDeleteLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex-1 space-y-4 p-8 pt-6">
+        <p>Carregando...</p>
+      </div>
+    );
+  }
 
   if (!representada) {
     return (
