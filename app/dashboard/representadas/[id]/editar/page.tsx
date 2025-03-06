@@ -1,5 +1,4 @@
 import { RepresentadaEditar } from "./representada-editar";
-import { representadasData } from "../data";
 
 export function generateStaticParams() {
   return representadasData.map((representada) => ({
