@@ -32,6 +32,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ArrowLeft, Building2, Mail, MapPin, Phone, Globe, DollarSign, Users, Plus, Trash } from "lucide-react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Mock data for payment conditions
 const condicoesPagamento = [
@@ -53,19 +55,68 @@ export default function NovaRepresentadaPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [tipo, setTipo] = useState("empresa");
+  const [estado, setEstado] = useState("");
   const [classificacao, setClassificacao] = useState<string[]>([]);
   const [tabelasPreco, setTabelasPreco] = useState([
     { nome: "Tabela Padrão", desconto: 0, comissao: 5 }
   ]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    // Aqui vai a lógica de submissão do formulário
-    setTimeout(() => {
-      setLoading(false);
+    const token = localStorage.getItem("token");
+
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      codigoREPRESENTADA: crypto.randomUUID(),
+      razaoSocialREPRESENTADA: formData.get("razaoSocial"),
+      nomeFantasiaREPRESENTADA: formData.get("nomeFantasia"),
+      cnpjREPRESENTADA: formData.get("cnpj"),
+      inscricaoEstadualREPRESENTADA: formData.get("inscricaoEstadual"),
+      segmentoREPRESENTADA: formData.get("segmento"),
+      ativoREPRESENTADA: true,
+      cidadeREPRESENTADA: formData.get("cidade"),
+      estadoREPRESENTADA: estado,
+      enderecoREPRESENTADA: formData.get("endereco"),
+      numeroREPRESENTADA: formData.get("numero"),
+      complementoREPRESENTADA: formData.get("complemento"),
+      bairroREPRESENTADA: formData.get("bairro"),
+      cepREPRESENTADA: formData.get("cep"),
+      telefonePrincipalREPRESENTADA: formData.get("telefone"),
+      faxREPRESENTADA: formData.get("fax"),
+      telefoneAdicionalREPRESENTADA: formData.get("telefoneAdicional"),
+      emailREPRESENTADA: formData.get("email"),
+      emailFinanceiroREPRESENTADA: formData.get("emailFinanceiro"),
+      websiteREPRESENTADA: formData.get("website"),
+      instagramREPRESENTADA: formData.get("instagram"),
+      facebookREPRESENTADA: formData.get("facebook"),
+      observacoesREPRESENTADA: formData.get("observacoes"),
+    };
+
+    console.log(data); // Log the data being sent
+
+    try {
+      const response = await fetch("https://apicloud.tavrus.com.br/api/representadas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao criar representada");
+      }
+
+      toast.success("Representada criada com sucesso!");
       router.push("/dashboard/representadas");
-    }, 2000);
+    } catch (error) {
+      console.error("Erro ao criar representada:", error);
+      toast.error("Erro ao criar representada");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const adicionarTabelaPreco = () => {
@@ -105,26 +156,51 @@ export default function NovaRepresentadaPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="razaoSocial">Razão Social</Label>
-                  <Input id="razaoSocial" placeholder="Razão Social" required />
+                  <Input 
+                    id="razaoSocial"
+                    name="razaoSocial"
+                    placeholder="Razão Social"
+                    required 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
-                  <Input id="nomeFantasia" placeholder="Nome Fantasia" required />
+                  <Input 
+                    id="nomeFantasia"
+                    name="nomeFantasia"
+                    placeholder="Nome Fantasia"
+                    required 
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="cnpj">CNPJ</Label>
-                  <Input id="cnpj" placeholder="00.000.000/0000-00" required />
+                  <Input 
+                    id="cnpj"
+                    name="cnpj"
+                    placeholder="00.000.000/0000-00"
+                    required 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="inscricaoEstadual">Inscrição Estadual</Label>
-                  <Input id="inscricaoEstadual" placeholder="Inscrição Estadual" />
+                  <Input 
+                    id="inscricaoEstadual"
+                    name="inscricaoEstadual"
+                    placeholder="Inscrição Estadual"
+                    required 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="segmento">Segmento</Label>
-                  <Input id="segmento" placeholder="Segmento de atuação" required />
+                  <Input 
+                    id="segmento"
+                    name="segmento"
+                    placeholder="Segmento de atuação"
+                    required 
+                  />
                 </div>
               </div>
             </CardContent>
@@ -267,37 +343,66 @@ export default function NovaRepresentadaPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="endereco">Endereço</Label>
-                  <Input id="endereco" placeholder="Rua, Avenida" required />
+                  <Input 
+                    id="endereco"
+                    name="endereco"
+                    placeholder="Rua, Avenida"
+                    required 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="numero">Número</Label>
-                  <Input id="numero" placeholder="Número" required />
+                  <Input 
+                    id="numero"
+                    name="numero"
+                    placeholder="Número"
+                    required 
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="complemento">Complemento</Label>
-                  <Input id="complemento" placeholder="Complemento" />
+                  <Input 
+                    id="complemento"
+                    name="complemento"
+                    placeholder="Complemento"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="bairro">Bairro</Label>
-                  <Input id="bairro" placeholder="Bairro" required />
+                  <Input 
+                    id="bairro"
+                    name="bairro"
+                    placeholder="Bairro"
+                    required 
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="cep">CEP</Label>
-                  <Input id="cep" placeholder="00000-000" required />
+                  <Input 
+                    id="cep"
+                    name="cep"
+                    placeholder="00000-000"
+                    required 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="cidade">Cidade</Label>
-                  <Input id="cidade" placeholder="Cidade" required />
+                  <Input 
+                    id="cidade"
+                    name="cidade"
+                    placeholder="Cidade"
+                    required 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="estado">Estado</Label>
-                  <Select required>
+                  <Select value={estado} onValueChange={setEstado} required>
                     <SelectTrigger>
                       <SelectValue placeholder="UF" />
                     </SelectTrigger>
@@ -327,8 +432,9 @@ export default function NovaRepresentadaPage() {
                   <div className="relative">
                     <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input 
-                      id="telefone" 
-                      placeholder="(00) 0000-0000" 
+                      id="telefone"
+                      name="telefone"
+                      placeholder="(00) 0000-0000"
                       className="pl-9"
                       required 
                     />
@@ -336,11 +442,19 @@ export default function NovaRepresentadaPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="fax">Fax</Label>
-                  <Input id="fax" placeholder="(00) 0000-0000" />
+                  <Input 
+                    id="fax"
+                    name="fax"
+                    placeholder="(00) 0000-0000"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="telefoneAdicional">Telefone Adicional</Label>
-                  <Input id="telefoneAdicional" placeholder="(00) 0000-0000" />
+                  <Input 
+                    id="telefoneAdicional"
+                    name="telefoneAdicional"
+                    placeholder="(00) 0000-0000"
+                  />
                 </div>
               </div>
 
@@ -350,9 +464,10 @@ export default function NovaRepresentadaPage() {
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="email@empresa.com" 
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="email@empresa.com"
                       className="pl-9"
                       required 
                     />
@@ -363,9 +478,10 @@ export default function NovaRepresentadaPage() {
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input 
-                      id="emailFinanceiro" 
-                      type="email" 
-                      placeholder="financeiro@empresa.com" 
+                      id="emailFinanceiro"
+                      name="emailFinanceiro"
+                      type="email"
+                      placeholder="financeiro@empresa.com"
                       className="pl-9"
                     />
                   </div>
@@ -378,19 +494,28 @@ export default function NovaRepresentadaPage() {
                   <div className="relative">
                     <Globe className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input 
-                      id="website" 
-                      placeholder="www.empresa.com" 
+                      id="website"
+                      name="website"
+                      placeholder="www.empresa.com"
                       className="pl-9"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="instagram">Instagram</Label>
-                  <Input id="instagram" placeholder="@empresa" />
+                  <Input 
+                    id="instagram"
+                    name="instagram"
+                    placeholder="@empresa"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="facebook">Facebook</Label>
-                  <Input id="facebook" placeholder="facebook.com/empresa" />
+                  <Input 
+                    id="facebook"
+                    name="facebook"
+                    placeholder="facebook.com/empresa"
+                  />
                 </div>
               </div>
             </CardContent>
@@ -403,6 +528,8 @@ export default function NovaRepresentadaPage() {
             </CardHeader>
             <CardContent>
               <Textarea 
+                id="observacoes"
+                name="observacoes"
                 placeholder="Digite aqui observações importantes..."
                 className="min-h-[100px]"
               />

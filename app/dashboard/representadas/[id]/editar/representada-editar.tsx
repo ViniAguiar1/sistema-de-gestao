@@ -35,35 +35,35 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 interface Representada {
-  codigoREPRESENTADA: number;
-  nomeFantasiaREPRESENTADA: string;
-  cidadeREPRESENTADA: string;
-  estadoREPRESENTADA: string;
-  segmentoREPRESENTADA: string;
-  razaoSocialREPRESENTADA: string;
-  telefonePrincipalREPRESENTADA: string;
-  emailREPRESENTADA: string;
-  cnpjREPRESENTADA?: string;
-  inscricaoEstadualREPRESENTADA?: string;
-  enderecoREPRESENTADA?: string;
-  numeroREPRESENTADA?: string;
-  complementoREPRESENTADA?: string;
-  bairroREPRESENTADA?: string;
-  cepREPRESENTADA?: string;
-  faxREPRESENTADA?: string;
-  telefoneAdicionalREPRESENTADA?: string;
-  emailFinanceiroREPRESENTADA?: string;
-  websiteREPRESENTADA?: string;
-  instagramREPRESENTADA?: string;
-  facebookREPRESENTADA?: string;
-  observacoesREPRESENTADA?: string;
+  codigo: number;
+  nomeFantasia: string;
+  cidade: string;
+  estado: string;
+  segmento: string;
+  razaoSocial: string;
+  telefonePrincipal: string;
+  email: string;
+  cnpj?: string;
+  inscricaoEstadual?: string;
+  endereco?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cep?: string;
+  fax?: string;
+  telefoneAdicional?: string;
+  emailFinanceiro?: string;
+  website?: string;
+  instagram?: string;
+  facebook?: string;
+  observacoes?: string;
 }
 
 export function RepresentadaEditar({ id }: { id: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [representada, setRepresentada] = useState<Representada | null>(null);
-  const [estado, setEstado] = useState(representada?.estadoREPRESENTADA || "");
+  const [estado, setEstado] = useState(representada?.estado || "");
 
   useEffect(() => {
     const fetchRepresentada = async () => {
@@ -79,7 +79,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
         }
         const data = await response.json();
         setRepresentada(data);
-        setEstado(data.estadoREPRESENTADA);
+        setEstado(data.estado);
       } catch (error) {
         console.error("Erro ao buscar representada:", error);
         toast.error("Erro ao carregar dados da representada");
@@ -98,27 +98,27 @@ export function RepresentadaEditar({ id }: { id: string }) {
 
     const formData = new FormData(e.currentTarget);
     const updatedData = {
-      nomeFantasiaREPRESENTADA: formData.get("nomeFantasia"),
-      razaoSocialREPRESENTADA: formData.get("razaoSocial"),
-      segmentoREPRESENTADA: formData.get("segmento"),
-      cidadeREPRESENTADA: formData.get("cidade"),
-      estadoREPRESENTADA: estado,
-      telefonePrincipalREPRESENTADA: formData.get("telefone"),
-      emailREPRESENTADA: formData.get("email"),
-      cnpjREPRESENTADA: formData.get("cnpj"),
-      inscricaoEstadualREPRESENTADA: formData.get("inscricaoEstadual"),
-      enderecoREPRESENTADA: formData.get("endereco"),
-      numeroREPRESENTADA: formData.get("numero"),
-      complementoREPRESENTADA: formData.get("complemento"),
-      bairroREPRESENTADA: formData.get("bairro"),
-      cepREPRESENTADA: formData.get("cep"),
-      faxREPRESENTADA: formData.get("fax"),
-      telefoneAdicionalREPRESENTADA: formData.get("telefoneAdicional"),
-      emailFinanceiroREPRESENTADA: formData.get("emailFinanceiro"),
-      websiteREPRESENTADA: formData.get("website"),
-      instagramREPRESENTADA: formData.get("instagram"),
-      facebookREPRESENTADA: formData.get("facebook"),
-      observacoesREPRESENTADA: formData.get("observacoes"),
+      nomeFantasia: formData.get("nomeFantasia"),
+      razaoSocial: formData.get("razaoSocial"),
+      segmento: formData.get("segmento"),
+      cidade: formData.get("cidade"),
+      estado: estado,
+      telefonePrincipal: formData.get("telefone"),
+      email: formData.get("email"),
+      cnpj: formData.get("cnpj"),
+      inscricaoEstadual: formData.get("inscricaoEstadual"),
+      endereco: formData.get("endereco"),
+      numero: formData.get("numero"),
+      complemento: formData.get("complemento"),
+      bairro: formData.get("bairro"),
+      cep: formData.get("cep"),
+      fax: formData.get("fax"),
+      telefoneAdicional: formData.get("telefoneAdicional"),
+      emailFinanceiro: formData.get("emailFinanceiro"),
+      website: formData.get("website"),
+      instagram: formData.get("instagram"),
+      facebook: formData.get("facebook"),
+      observacoes: formData.get("observacoes"),
     };
 
     try {
@@ -189,7 +189,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                   <Input 
                     id="razaoSocial"
                     name="razaoSocial"
-                    defaultValue={representada.razaoSocialREPRESENTADA}
+                    defaultValue={representada.razaoSocial}
                     required 
                   />
                 </div>
@@ -198,7 +198,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                   <Input 
                     id="nomeFantasia"
                     name="nomeFantasia"
-                    defaultValue={representada.nomeFantasiaREPRESENTADA}
+                    defaultValue={representada.nomeFantasia}
                     required 
                   />
                 </div>
@@ -210,7 +210,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                   <Input 
                     id="cnpj"
                     name="cnpj"
-                    defaultValue={representada.cnpjREPRESENTADA}
+                    defaultValue={representada.cnpj}
                     required 
                   />
                 </div>
@@ -219,7 +219,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                   <Input 
                     id="inscricaoEstadual"
                     name="inscricaoEstadual"
-                    defaultValue={representada.inscricaoEstadualREPRESENTADA}
+                    defaultValue={representada.inscricaoEstadual}
                   />
                 </div>
                 <div className="space-y-2">
@@ -227,7 +227,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                   <Input 
                     id="segmento"
                     name="segmento"
-                    defaultValue={representada.segmentoREPRESENTADA}
+                    defaultValue={representada.segmento}
                     required 
                   />
                 </div>
@@ -250,7 +250,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                   <Input 
                     id="endereco"
                     name="endereco"
-                    defaultValue={representada.enderecoREPRESENTADA}
+                    defaultValue={representada.endereco}
                     required 
                   />
                 </div>
@@ -259,7 +259,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                   <Input 
                     id="numero"
                     name="numero"
-                    defaultValue={representada.numeroREPRESENTADA}
+                    defaultValue={representada.numero}
                     required 
                   />
                 </div>
@@ -271,7 +271,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                   <Input 
                     id="complemento"
                     name="complemento"
-                    defaultValue={representada.complementoREPRESENTADA}
+                    defaultValue={representada.complemento}
                   />
                 </div>
                 <div className="space-y-2">
@@ -279,7 +279,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                   <Input 
                     id="bairro"
                     name="bairro"
-                    defaultValue={representada.bairroREPRESENTADA}
+                    defaultValue={representada.bairro}
                     required 
                   />
                 </div>
@@ -291,7 +291,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                   <Input 
                     id="cep"
                     name="cep"
-                    defaultValue={representada.cepREPRESENTADA}
+                    defaultValue={representada.cep}
                     required 
                   />
                 </div>
@@ -300,7 +300,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                   <Input 
                     id="cidade"
                     name="cidade"
-                    defaultValue={representada.cidadeREPRESENTADA}
+                    defaultValue={representada.cidade}
                     required 
                   />
                 </div>
@@ -338,7 +338,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                     <Input 
                       id="telefone"
                       name="telefone"
-                      defaultValue={representada.telefonePrincipalREPRESENTADA}
+                      defaultValue={representada.telefonePrincipal}
                       className="pl-9"
                       required 
                     />
@@ -349,7 +349,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                   <Input 
                     id="fax"
                     name="fax"
-                    defaultValue={representada.faxREPRESENTADA}
+                    defaultValue={representada.fax}
                   />
                 </div>
                 <div className="space-y-2">
@@ -357,7 +357,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                   <Input 
                     id="telefoneAdicional"
                     name="telefoneAdicional"
-                    defaultValue={representada.telefoneAdicionalREPRESENTADA}
+                    defaultValue={representada.telefoneAdicional}
                   />
                 </div>
               </div>
@@ -371,7 +371,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                       id="email"
                       name="email"
                       type="email"
-                      defaultValue={representada.emailREPRESENTADA}
+                      defaultValue={representada.email}
                       className="pl-9"
                       required 
                     />
@@ -385,7 +385,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                       id="emailFinanceiro"
                       name="emailFinanceiro"
                       type="email"
-                      defaultValue={representada.emailFinanceiroREPRESENTADA}
+                      defaultValue={representada.emailFinanceiro}
                       className="pl-9"
                     />
                   </div>
@@ -400,7 +400,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                     <Input 
                       id="website"
                       name="website"
-                      defaultValue={representada.websiteREPRESENTADA}
+                      defaultValue={representada.website}
                       className="pl-9"
                     />
                   </div>
@@ -410,7 +410,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                   <Input 
                     id="instagram"
                     name="instagram"
-                    defaultValue={representada.instagramREPRESENTADA}
+                    defaultValue={representada.instagram}
                   />
                 </div>
                 <div className="space-y-2">
@@ -418,7 +418,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
                   <Input 
                     id="facebook"
                     name="facebook"
-                    defaultValue={representada.facebookREPRESENTADA}
+                    defaultValue={representada.facebook}
                   />
                 </div>
               </div>
@@ -434,7 +434,7 @@ export function RepresentadaEditar({ id }: { id: string }) {
               <Textarea 
                 id="observacoes"
                 name="observacoes"
-                defaultValue={representada.observacoesREPRESENTADA}
+                defaultValue={representada.observacoes}
                 className="min-h-[100px]"
               />
             </CardContent>
