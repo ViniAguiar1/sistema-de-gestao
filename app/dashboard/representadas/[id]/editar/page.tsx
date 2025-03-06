@@ -1,11 +1,11 @@
-import { RepresentadaEditar } from "./representada-editar";
+"use client";
 
-export function generateStaticParams() {
-  return representadasData.map((representada) => ({
-    id: representada.id.toString(),
-  }));
-}
+import { RepresentadaEditar } from "./representada-editar";
+import { useParams } from "next/navigation";
 
 export default function RepresentadaEditarPage() {
-  return <RepresentadaEditar />;
+  const params = useParams();
+  const id = params.id as string;
+
+  return <RepresentadaEditar id={id} />;
 }

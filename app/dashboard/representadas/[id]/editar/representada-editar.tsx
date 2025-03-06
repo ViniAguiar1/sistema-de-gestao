@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -31,41 +31,131 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ArrowLeft, Building2, Mail, MapPin, Phone, Globe, DollarSign, Plus, Trash } from "lucide-react";
-import { representadasData } from "../data";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-export function RepresentadaEditar() {
+interface Representada {
+  codigoREPRESENTADA: number;
+  nomeFantasiaREPRESENTADA: string;
+  cidadeREPRESENTADA: string;
+  estadoREPRESENTADA: string;
+  segmentoREPRESENTADA: string;
+  razaoSocialREPRESENTADA: string;
+  telefonePrincipalREPRESENTADA: string;
+  emailREPRESENTADA: string;
+  cnpjREPRESENTADA?: string;
+  inscricaoEstadualREPRESENTADA?: string;
+  enderecoREPRESENTADA?: string;
+  numeroREPRESENTADA?: string;
+  complementoREPRESENTADA?: string;
+  bairroREPRESENTADA?: string;
+  cepREPRESENTADA?: string;
+  faxREPRESENTADA?: string;
+  telefoneAdicionalREPRESENTADA?: string;
+  emailFinanceiroREPRESENTADA?: string;
+  websiteREPRESENTADA?: string;
+  instagramREPRESENTADA?: string;
+  facebookREPRESENTADA?: string;
+  observacoesREPRESENTADA?: string;
+}
+
+export function RepresentadaEditar({ id }: { id: string }) {
   const router = useRouter();
-  const params = useParams();
-  const representadaId = Number(params.id);
   const [loading, setLoading] = useState(false);
+  const [representada, setRepresentada] = useState<Representada | null>(null);
+  const [estado, setEstado] = useState(representada?.estadoREPRESENTADA || "");
 
-  const representada = representadasData.find(r => r.id === representadaId);
+  useEffect(() => {
+    const fetchRepresentada = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const response = await fetch(`https://apicloud.tavrus.com.br/api/representadas/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Erro ao buscar dados da representada");
+        }
+        const data = await response.json();
+        setRepresentada(data);
+        setEstado(data.estadoREPRESENTADA);
+      } catch (error) {
+        console.error("Erro ao buscar representada:", error);
+        toast.error("Erro ao carregar dados da representada");
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      fetchRepresentada();
+    }
+  }, [id]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    const token = localStorage.getItem("token");
+
+    const formData = new FormData(e.currentTarget);
+    const updatedData = {
+      nomeFantasiaREPRESENTADA: formData.get("nomeFantasia"),
+      razaoSocialREPRESENTADA: formData.get("razaoSocial"),
+      segmentoREPRESENTADA: formData.get("segmento"),
+      cidadeREPRESENTADA: formData.get("cidade"),
+      estadoREPRESENTADA: estado,
+      telefonePrincipalREPRESENTADA: formData.get("telefone"),
+      emailREPRESENTADA: formData.get("email"),
+      cnpjREPRESENTADA: formData.get("cnpj"),
+      inscricaoEstadualREPRESENTADA: formData.get("inscricaoEstadual"),
+      enderecoREPRESENTADA: formData.get("endereco"),
+      numeroREPRESENTADA: formData.get("numero"),
+      complementoREPRESENTADA: formData.get("complemento"),
+      bairroREPRESENTADA: formData.get("bairro"),
+      cepREPRESENTADA: formData.get("cep"),
+      faxREPRESENTADA: formData.get("fax"),
+      telefoneAdicionalREPRESENTADA: formData.get("telefoneAdicional"),
+      emailFinanceiroREPRESENTADA: formData.get("emailFinanceiro"),
+      websiteREPRESENTADA: formData.get("website"),
+      instagramREPRESENTADA: formData.get("instagram"),
+      facebookREPRESENTADA: formData.get("facebook"),
+      observacoesREPRESENTADA: formData.get("observacoes"),
+    };
+
+    try {
+      const response = await fetch(`https://apicloud.tavrus.com.br/api/representadas/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar representada");
+      }
+
+      toast.success("Representada atualizada com sucesso!");
+      router.push("/dashboard/representadas");
+    } catch (error) {
+      console.error("Erro ao atualizar representada:", error);
+      toast.error("Erro ao atualizar representada");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!representada) {
     return (
       <div className="flex-1 space-y-4 p-8 pt-6">
         <Card>
           <CardContent className="pt-6">
-            <div className="text-center text-muted-foreground">Representada não encontrada</div>
+            <div className="text-center text-muted-foreground">Carregando...</div>
           </CardContent>
         </Card>
       </div>
     );
   }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      // Aqui vai a lógica de atualização
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      router.push(`/dashboard/representadas/${representadaId}`);
-    } catch (error) {
-      console.error('Erro ao atualizar representada:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
@@ -97,16 +187,18 @@ export function RepresentadaEditar() {
                 <div className="space-y-2">
                   <Label htmlFor="razaoSocial">Razão Social</Label>
                   <Input 
-                    id="razaoSocial" 
-                    defaultValue={representada.razaoSocial}
+                    id="razaoSocial"
+                    name="razaoSocial"
+                    defaultValue={representada.razaoSocialREPRESENTADA}
                     required 
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
                   <Input 
-                    id="nomeFantasia" 
-                    defaultValue={representada.nomeFantasia}
+                    id="nomeFantasia"
+                    name="nomeFantasia"
+                    defaultValue={representada.nomeFantasiaREPRESENTADA}
                     required 
                   />
                 </div>
@@ -116,141 +208,30 @@ export function RepresentadaEditar() {
                 <div className="space-y-2">
                   <Label htmlFor="cnpj">CNPJ</Label>
                   <Input 
-                    id="cnpj" 
-                    defaultValue={representada.cnpj}
+                    id="cnpj"
+                    name="cnpj"
+                    defaultValue={representada.cnpjREPRESENTADA}
                     required 
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="inscricaoEstadual">Inscrição Estadual</Label>
                   <Input 
-                    id="inscricaoEstadual" 
-                    defaultValue={representada.inscricaoEstadual}
+                    id="inscricaoEstadual"
+                    name="inscricaoEstadual"
+                    defaultValue={representada.inscricaoEstadualREPRESENTADA}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="segmento">Segmento</Label>
                   <Input 
-                    id="segmento" 
-                    defaultValue={representada.segmento}
+                    id="segmento"
+                    name="segmento"
+                    defaultValue={representada.segmentoREPRESENTADA}
                     required 
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Condições de Pagamento */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Condições de Pagamento
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <Label>Condições Disponíveis</Label>
-                <div className="grid grid-cols-2 gap-4">
-                  {representada.condicoesPagamento.map((condicao) => (
-                    <div key={condicao.id} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`condicao-${condicao.id}`}
-                        defaultChecked
-                      />
-                      <Label htmlFor={`condicao-${condicao.id}`}>
-                        {condicao.nome}
-                        {condicao.desconto > 0 && ` (${condicao.desconto}% desconto)`}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <Label>Formas de Pagamento</Label>
-                <div className="grid grid-cols-2 gap-4">
-                  {representada.formasPagamento.map((forma) => (
-                    <div key={forma.id} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`forma-${forma.id}`}
-                        defaultChecked
-                      />
-                      <Label htmlFor={`forma-${forma.id}`}>{forma.nome}</Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Tabelas de Preço */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Tabelas de Preço
-              </CardTitle>
-              <CardDescription>
-                Configure as tabelas de preço e comissões
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome da Tabela</TableHead>
-                    <TableHead>Desconto (%)</TableHead>
-                    <TableHead>Comissão (%)</TableHead>
-                    <TableHead className="w-[100px]">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {representada.tabelasPreco.map((tabela, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <Input 
-                          defaultValue={tabela.nome}
-                          placeholder="Nome da tabela"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input 
-                          type="number"
-                          min="0"
-                          max="100"
-                          defaultValue={tabela.desconto}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input 
-                          type="number"
-                          min="0"
-                          max="100"
-                          defaultValue={tabela.comissao}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          disabled={index === 0}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <Button
-                type="button"
-                variant="outline"
-                className="gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Adicionar Tabela
-              </Button>
             </CardContent>
           </Card>
 
@@ -267,16 +248,18 @@ export function RepresentadaEditar() {
                 <div className="space-y-2">
                   <Label htmlFor="endereco">Endereço</Label>
                   <Input 
-                    id="endereco" 
-                    defaultValue={representada.endereco}
+                    id="endereco"
+                    name="endereco"
+                    defaultValue={representada.enderecoREPRESENTADA}
                     required 
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="numero">Número</Label>
                   <Input 
-                    id="numero" 
-                    defaultValue={representada.numero}
+                    id="numero"
+                    name="numero"
+                    defaultValue={representada.numeroREPRESENTADA}
                     required 
                   />
                 </div>
@@ -286,15 +269,17 @@ export function RepresentadaEditar() {
                 <div className="space-y-2">
                   <Label htmlFor="complemento">Complemento</Label>
                   <Input 
-                    id="complemento" 
-                    defaultValue={representada.complemento}
+                    id="complemento"
+                    name="complemento"
+                    defaultValue={representada.complementoREPRESENTADA}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="bairro">Bairro</Label>
                   <Input 
-                    id="bairro" 
-                    defaultValue={representada.bairro}
+                    id="bairro"
+                    name="bairro"
+                    defaultValue={representada.bairroREPRESENTADA}
                     required 
                   />
                 </div>
@@ -304,22 +289,24 @@ export function RepresentadaEditar() {
                 <div className="space-y-2">
                   <Label htmlFor="cep">CEP</Label>
                   <Input 
-                    id="cep" 
-                    defaultValue={representada.cep}
+                    id="cep"
+                    name="cep"
+                    defaultValue={representada.cepREPRESENTADA}
                     required 
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="cidade">Cidade</Label>
                   <Input 
-                    id="cidade" 
-                    defaultValue={representada.cidade}
+                    id="cidade"
+                    name="cidade"
+                    defaultValue={representada.cidadeREPRESENTADA}
                     required 
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="estado">Estado</Label>
-                  <Select defaultValue={representada.estado}>
+                  <Select value={estado} onValueChange={setEstado}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -349,8 +336,9 @@ export function RepresentadaEditar() {
                   <div className="relative">
                     <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input 
-                      id="telefone" 
-                      defaultValue={representada.telefone}
+                      id="telefone"
+                      name="telefone"
+                      defaultValue={representada.telefonePrincipalREPRESENTADA}
                       className="pl-9"
                       required 
                     />
@@ -359,15 +347,17 @@ export function RepresentadaEditar() {
                 <div className="space-y-2">
                   <Label htmlFor="fax">Fax</Label>
                   <Input 
-                    id="fax" 
-                    defaultValue={representada.fax}
+                    id="fax"
+                    name="fax"
+                    defaultValue={representada.faxREPRESENTADA}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="telefoneAdicional">Telefone Adicional</Label>
                   <Input 
-                    id="telefoneAdicional" 
-                    defaultValue={representada.telefoneAdicional}
+                    id="telefoneAdicional"
+                    name="telefoneAdicional"
+                    defaultValue={representada.telefoneAdicionalREPRESENTADA}
                   />
                 </div>
               </div>
@@ -378,9 +368,10 @@ export function RepresentadaEditar() {
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input 
-                      id="email" 
-                      type="email" 
-                      defaultValue={representada.email}
+                      id="email"
+                      name="email"
+                      type="email"
+                      defaultValue={representada.emailREPRESENTADA}
                       className="pl-9"
                       required 
                     />
@@ -391,9 +382,10 @@ export function RepresentadaEditar() {
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input 
-                      id="emailFinanceiro" 
-                      type="email" 
-                      defaultValue={representada.emailFinanceiro}
+                      id="emailFinanceiro"
+                      name="emailFinanceiro"
+                      type="email"
+                      defaultValue={representada.emailFinanceiroREPRESENTADA}
                       className="pl-9"
                     />
                   </div>
@@ -406,8 +398,9 @@ export function RepresentadaEditar() {
                   <div className="relative">
                     <Globe className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input 
-                      id="website" 
-                      defaultValue={representada.website}
+                      id="website"
+                      name="website"
+                      defaultValue={representada.websiteREPRESENTADA}
                       className="pl-9"
                     />
                   </div>
@@ -415,15 +408,17 @@ export function RepresentadaEditar() {
                 <div className="space-y-2">
                   <Label htmlFor="instagram">Instagram</Label>
                   <Input 
-                    id="instagram" 
-                    defaultValue={representada.instagram}
+                    id="instagram"
+                    name="instagram"
+                    defaultValue={representada.instagramREPRESENTADA}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="facebook">Facebook</Label>
                   <Input 
-                    id="facebook" 
-                    defaultValue={representada.facebook}
+                    id="facebook"
+                    name="facebook"
+                    defaultValue={representada.facebookREPRESENTADA}
                   />
                 </div>
               </div>
@@ -437,7 +432,9 @@ export function RepresentadaEditar() {
             </CardHeader>
             <CardContent>
               <Textarea 
-                defaultValue={representada.observacoes}
+                id="observacoes"
+                name="observacoes"
+                defaultValue={representada.observacoesREPRESENTADA}
                 className="min-h-[100px]"
               />
             </CardContent>
