@@ -19,7 +19,7 @@ const menuItems = [
     href: "/dashboard",
   },
   {
-    title: "Clientes",
+    title: "Empresas e Pessoas",
     icon: Users,
     href: "/dashboard/clientes",
   },
