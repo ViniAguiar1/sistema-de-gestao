@@ -39,14 +39,15 @@ export default function RepresentadasPage() {
   const router = useRouter();
   const [deleteLoading, setDeleteLoading] = useState(false);
   interface Representada {
-    codigoREPRESENTADA: number;
-    nomeFantasiaREPRESENTADA: string;
-    cidadeREPRESENTADA: string;
-    estadoREPRESENTADA: string;
-    segmentoREPRESENTADA: string;
-    razaoSocialREPRESENTADA: string;
-    telefonePrincipalREPRESENTADA: string;
-    emailREPRESENTADA: string;
+    codigo: number;
+    nomeFantasia: string;
+    cidade: string;
+    estado: string;
+    segmento: string;
+    razaoSocial: string;
+    telefonePrincipal: string;
+    email: string;
+    comissao: number;
   }
 
   const [representadas, setRepresentadas] = useState<Representada[]>([]);
@@ -85,7 +86,7 @@ export default function RepresentadasPage() {
         throw new Error("Erro ao excluir representada");
       }
       // Atualizar a lista
-      setRepresentadas(prev => prev.filter(rep => rep.codigoREPRESENTADA !== id));
+      setRepresentadas(prev => prev.filter(rep => rep.codigo !== id));
       toast.success("Representada excluída com sucesso!");
     } catch (error) {
       console.error("Erro ao excluir representada:", error);
@@ -114,7 +115,7 @@ export default function RepresentadasPage() {
           <Input placeholder="Buscar representadas..." className="pl-8" />
         </div>
       </div>
-      
+
       <div className="rounded-lg border">
         <Table>
           <TableHeader>
@@ -128,37 +129,40 @@ export default function RepresentadasPage() {
           </TableHeader>
           <TableBody>
             {representadas.map((representada) => (
-              <TableRow key={representada.codigoREPRESENTADA}>
+              <TableRow key={representada.codigo}>
                 <TableCell>
                   <div>
-                    <p className="font-medium">{representada.nomeFantasiaREPRESENTADA}</p>
+                    <p className="font-medium">{representada.nomeFantasia}</p>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                       <div className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
-                        {representada.cidadeREPRESENTADA}/{representada.estadoREPRESENTADA}
+                        {representada.cidade}/{representada.estado}
                       </div>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>{representada.segmentoREPRESENTADA}</TableCell>
+                <TableCell>{representada.segmento}</TableCell>
                 <TableCell>
                   <div>
-                    <p>{representada.razaoSocialREPRESENTADA}</p>
+                    <p>{representada.razaoSocial}</p>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                       <div className="flex items-center gap-1">
                         <Phone className="h-3 w-3" />
-                        {representada.telefonePrincipalREPRESENTADA}
+                        {representada.telefonePrincipal}
                       </div>
                       <div className="flex items-center gap-1">
                         <Mail className="h-3 w-3" />
-                        {representada.emailREPRESENTADA}
+                        {representada.email}
                       </div>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="font-medium">N/A</div>
+                  <div className="font-medium">
+                    {representada.comissao != null ? `${representada.comissao}%` : 'N/A'}
+                  </div>
                 </TableCell>
+
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -167,20 +171,20 @@ export default function RepresentadasPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem 
-                        onClick={() => router.push(`/dashboard/representadas/${representada.codigoREPRESENTADA}`)}
+                      <DropdownMenuItem
+                        onClick={() => router.push(`/dashboard/representadas/${representada.codigo}`)}
                       >
                         Ver detalhes
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => router.push(`/dashboard/representadas/${representada.codigoREPRESENTADA}/editar`)}
+                      <DropdownMenuItem
+                        onClick={() => router.push(`/dashboard/representadas/${representada.codigo}/editar`)}
                       >
                         Editar
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             className="text-red-600"
                             onSelect={(e) => e.preventDefault()}
                           >
@@ -196,8 +200,8 @@ export default function RepresentadasPage() {
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction 
-                              onClick={() => handleDelete(representada.codigoREPRESENTADA)}
+                            <AlertDialogAction
+                              onClick={() => handleDelete(representada.codigo)}
                               disabled={deleteLoading}
                             >
                               {deleteLoading ? "Excluindo..." : "Excluir"}

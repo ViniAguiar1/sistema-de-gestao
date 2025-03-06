@@ -84,30 +84,37 @@ export function RepresentadaDetalhes({ id }: { id: string }) {
         });
         const data = await response.json();
         setRepresentada({
-          razaoSocial: data.razaoSocialREPRESENTADA,
-          nomeFantasia: data.nomeFantasiaREPRESENTADA,
-          cnpj: data.cnpjREPRESENTADA,
-          inscricaoEstadual: data.inscricaoEstadualREPRESENTADA,
-          segmento: data.segmentoREPRESENTADA,
-          condicoesPagamento: data.CondicaoPagamentoRepresentadas || [],
-          formasPagamento: data.formasPagamento || [],
-          tabelasPreco: data.TabelaPrecoRepresentadas || [],
-          endereco: data.enderecoREPRESENTADA,
-          numero: data.numeroREPRESENTADA,
-          complemento: data.complementoREPRESENTADA,
-          bairro: data.bairroREPRESENTADA,
-          cep: data.cepREPRESENTADA,
-          cidade: data.cidadeREPRESENTADA,
-          estado: data.estadoREPRESENTADA,
-          telefone: data.telefonePrincipalREPRESENTADA,
-          fax: data.faxREPRESENTADA,
-          telefoneAdicional: data.telefoneAdicionalREPRESENTADA,
-          email: data.emailREPRESENTADA,
-          emailFinanceiro: data.emailFinanceiroREPRESENTADA,
-          website: data.websiteREPRESENTADA,
-          instagram: data.instagramREPRESENTADA,
-          facebook: data.facebookREPRESENTADA,
-          observacoes: data.observacoesREPRESENTADA,
+          razaoSocial: data.razaoSocial,
+          nomeFantasia: data.nomeFantasia,
+          cnpj: data.cnpj,
+          inscricaoEstadual: data.inscricaoEstadual,
+          segmento: data.segmento,
+          condicoesPagamento: data.CondicaoPagamentoRepresentadas?.map(condicao => ({
+            nome: condicao.formaCONDICAO,
+            desconto: 0 // Assuming no discount information in the new structure
+          })) || [],
+          formasPagamento: [], // Assuming no formasPagamento information in the new structure
+          tabelasPreco: data.TabelaPrecoRepresentadas?.map(tabela => ({
+            nome: tabela.nomeTABELA,
+            desconto: parseFloat(tabela.descontoTABELA),
+            comissao: parseFloat(tabela.comissaoTABELA)
+          })) || [],
+          endereco: data.endereco,
+          numero: data.numero,
+          complemento: data.complemento,
+          bairro: data.bairro,
+          cep: data.cep,
+          cidade: data.cidade,
+          estado: data.estado,
+          telefone: data.telefonePrincipal,
+          fax: data.fax,
+          telefoneAdicional: data.telefoneAdicional,
+          email: data.email,
+          emailFinanceiro: data.emailFinanceiro,
+          website: data.website,
+          instagram: data.instagram,
+          facebook: data.facebook,
+          observacoes: data.observacoes,
         });
       } catch (error) {
         console.error('Erro ao buscar representada:', error);
