@@ -20,11 +20,13 @@ interface Cliente {
   nomeFantasia: string;
   telefonePrincipal: string | null;
   emailPrincipal: string | null;
+  tipo: string;
   status: string;
 }
 
 export default function ClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [searchQuery, setSearchQuery] = useState(""); // Add state for search query
   const router = useRouter();
 
   useEffect(() => {
@@ -59,14 +61,18 @@ export default function ClientesPage() {
     fetchClientes();
   }, [router]);
 
+  const filteredClientes = clientes.filter(cliente =>
+    cliente.nomeFantasia.toLowerCase().includes(searchQuery.toLowerCase())
+  ); // Filter clients based on search query
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Clientes</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Empresas e Pessoas</h2>
         <Link href="/dashboard/clientes/novo">
           <Button className="gap-2">
             <Plus className="h-4 w-4" />
-            Novo Cliente
+            Nova Empresa
           </Button>
         </Link>
       </div>
@@ -74,7 +80,12 @@ export default function ClientesPage() {
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar clientes..." className="pl-8" />
+          <Input 
+            placeholder="Buscar empresas..." 
+            className="pl-8" 
+            value={searchQuery} 
+            onChange={(e) => setSearchQuery(e.target.value)} // Update search query on input change
+          />
         </div>
       </div>
       
@@ -82,14 +93,15 @@ export default function ClientesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Cliente</TableHead>
+              <TableHead>Empresa</TableHead>
               <TableHead>Contato</TableHead>
+              <TableHead>Tipo</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {clientes.map((cliente) => (
+            {filteredClientes.map((cliente) => ( // Use filtered clients
               <TableRow key={cliente.codigo}>
                 <TableCell>
                   <div>
@@ -107,6 +119,7 @@ export default function ClientesPage() {
                   </div>
                 </TableCell>
                 <TableCell>{cliente.telefonePrincipal ?? "N/A"}</TableCell>
+                <TableCell>{cliente.tipo ?? "N/A"}</TableCell>
                 <TableCell>
                   <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                     cliente.status === 'Ativo' 
