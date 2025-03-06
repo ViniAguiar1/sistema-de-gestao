@@ -121,12 +121,20 @@ export function RepresentadaDetalhes() {
 
   const handleDelete = async () => {
     setDeleteLoading(true);
+    const token = localStorage.getItem("token");
     try {
-      // Aqui vai a lógica de deleção
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch(`https://apicloud.tavrus.com.br/api/representadas/${representadaId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Erro ao excluir representada");
+      }
       router.push('/dashboard/representadas');
     } catch (error) {
-      console.error('Erro ao excluir representada:', error);
+      console.error("Erro ao excluir representada:", error);
     } finally {
       setDeleteLoading(false);
     }
