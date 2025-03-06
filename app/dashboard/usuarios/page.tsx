@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,81 +19,52 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Plus, Search, MoreHorizontal, Mail, Shield, Eye, Pencil, Trash } from "lucide-react";
+import { Plus, Search, MoreHorizontal, Mail, Shield, Pencil } from "lucide-react";
 import Link from "next/link";
 
-const usuarios = [
-  {
-    id: 1,
-    nome: "João Silva",
-    email: "joao.silva@empresa.com",
-    cargo: "Administrador",
-    empresa: "Matriz",
-    status: "Ativo",
-  },
-  {
-    id: 2,
-    nome: "Maria Santos",
-    email: "maria.santos@filial1.com",
-    cargo: "Vendedor",
-    empresa: "Filial SP",
-    status: "Ativo",
-  },
-  {
-    id: 3,
-    nome: "Pedro Costa",
-    email: "pedro.costa@filial2.com",
-    cargo: "Gerente",
-    empresa: "Filial RJ",
-    status: "Inativo",
-  },
-];
+const API_URL = "https://apicloud.tavrus.com.br/api/usuarios";
 
 export default function UsuariosPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<number | null>(null);
+  const [usuarios, setUsuarios] = useState<Usuarios[]>([]);
 
-  // Filter users based on search term
-  const filteredUsuarios = usuarios.filter(usuario => 
-    usuario.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    usuario.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    usuario.cargo.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  interface Usuarios{
+    codigo: number;
+    nome: string;
+    ativo: boolean;
+    email: string;
+    tipousuario: string;
+  }
 
-  const handleViewUser = (id: number) => {
-    router.push(`/dashboard/usuarios/${id}`);
-  };
+  useEffect(() => {
+    fetchUsuarios();
+  }, []);
 
-  const handleEditUser = (id: number) => {
-    router.push(`/dashboard/usuarios/${id}/editar`);
-  };
-
-  const handleDeleteUser = async (id: number) => {
-    setDeleteLoading(true);
-    setUserToDelete(id);
+  const fetchUsuarios = async () => {
     try {
-      // Aqui iria a lógica de deleção
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      // Atualizar a lista de usuários
-      console.log(`Usuário ${id} excluído com sucesso`);
+      const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao carregar usuários");
+      }
+
+      const data = await response.json();
+      console.log("Usuários da API:", data);
+
+      if (Array.isArray(data)) {
+        setUsuarios(data);
+      } else {
+        console.error("Formato inválido da resposta da API");
+      }
     } catch (error) {
-      console.error("Erro ao excluir usuário:", error);
-    } finally {
-      setDeleteLoading(false);
-      setUserToDelete(null);
+      console.error("Erro ao buscar usuários:", error);
     }
   };
 
@@ -112,29 +83,28 @@ export default function UsuariosPage() {
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Buscar usuários..." 
+          <Input
+            placeholder="Buscar usuários..."
             className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
-      
+
       <div className="rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Usuário</TableHead>
               <TableHead>Cargo</TableHead>
-              <TableHead>Empresa</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredUsuarios.map((usuario) => (
-              <TableRow key={usuario.id}>
+            {usuarios.map((usuario) => (
+              <TableRow key={usuario.codigo}>
                 <TableCell>
                   <div>
                     <p className="font-medium">{usuario.nome}</p>
@@ -149,17 +119,17 @@ export default function UsuariosPage() {
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-muted-foreground" />
-                    {usuario.cargo}
+                    {usuario.tipousuario}
                   </div>
                 </TableCell>
-                <TableCell>{usuario.empresa}</TableCell>
                 <TableCell>
-                  <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                    usuario.status === 'Ativo' 
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {usuario.status}
+                  <div
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${usuario.ativo
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "bg-gray-100 text-gray-800"
+                      }`}
+                  >
+                    {usuario.ativo ? "Ativo" : "Inativo"}
                   </div>
                 </TableCell>
                 <TableCell>
@@ -170,43 +140,19 @@ export default function UsuariosPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleViewUser(usuario.id)}>
-                        <Eye className="h-4 w-4 mr-2" />
+                      <DropdownMenuItem>
+                        <Shield className="h-4 w-4 mr-2" />
                         Ver detalhes
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleEditUser(usuario.id)}>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          router.push(`/dashboard/usuarios/${usuario.codigo}/editar`)
+                        }
+                      >
                         <Pencil className="h-4 w-4 mr-2" />
                         Editar
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <DropdownMenuItem 
-                            className="text-red-600"
-                            onSelect={(e) => e.preventDefault()}
-                          >
-                            <Trash className="h-4 w-4 mr-2" />
-                            Excluir
-                          </DropdownMenuItem>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction 
-                              onClick={() => handleDeleteUser(usuario.id)}
-                              disabled={deleteLoading && userToDelete === usuario.id}
-                            >
-                              {deleteLoading && userToDelete === usuario.id ? "Excluindo..." : "Excluir"}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -214,22 +160,6 @@ export default function UsuariosPage() {
             ))}
           </TableBody>
         </Table>
-
-        {filteredUsuarios.length === 0 && (
-          <div className="flex items-center justify-center h-64 border rounded-lg">
-            <div className="text-center">
-              <p className="text-muted-foreground">Nenhum usuário encontrado</p>
-              {searchTerm && (
-                <Button 
-                  variant="link" 
-                  onClick={() => setSearchTerm("")}
-                >
-                  Limpar busca
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
