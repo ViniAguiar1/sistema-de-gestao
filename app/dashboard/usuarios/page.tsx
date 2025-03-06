@@ -19,48 +19,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Plus, Search, MoreHorizontal, Mail, Shield, Eye, Pencil, Trash } from "lucide-react";
+import { Plus, Search, MoreHorizontal, Mail, Shield, Pencil } from "lucide-react";
 import Link from "next/link";
 
 const API_URL = "https://apicloud.tavrus.com.br/api/usuarios";
-const CREATE_USER_URL = "https://apicloud.tavrus.com.br/api/usuarios/criar";
-const LOGIN_URL = "https://apicloud.tavrus.com.br/api/login";
 
 export default function UsuariosPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
-  const [usuarios, setUsuarios] = useState<any[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newUser, setNewUser] = useState({
-    codigo: Math.floor(Math.random() * 10000),
-    nome: "",
-    email: "",
-    senha: "",
-    telefone: "",
-    tipousuario: "",
-    empresa: "",
-    ativo: true,
-    datacriacao: new Date().toISOString(),
-  });
-  const [loading, setLoading] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
+  const [usuarios, setUsuarios] = useState<Usuarios[]>([]);
+
+  interface Usuarios{
+    codigo: number;
+    nome: string;
+    ativo: boolean;
+    email: string;
+    tipousuario: string;
+  }
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("token");
-    if (savedToken) {
-      setToken(savedToken);
-    }
     fetchUsuarios();
   }, []);
 
@@ -91,58 +68,16 @@ export default function UsuariosPage() {
     }
   };
 
-  const handleCreateUser = async () => {
-    if (!token) {
-      alert("Você precisa estar logado para cadastrar usuários.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch(CREATE_USER_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify(newUser),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Erro ao cadastrar usuário: ${errorText}`);
-      }
-
-      alert("Usuário cadastrado com sucesso!");
-      setNewUser({
-        codigo: Math.floor(Math.random() * 10000),
-        nome: "",
-        email: "",
-        senha: "",
-        telefone: "",
-        tipousuario: "",
-        empresa: "",
-        ativo: true,
-        datacriacao: new Date().toISOString(),
-      });
-      setIsDialogOpen(false);
-      fetchUsuarios();
-    } catch (error) {
-      console.error(error);
-      alert("Erro ao cadastrar usuário. Verifique a autenticação.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Usuários</h2>
-        <Button onClick={() => setIsDialogOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Novo Usuário
-        </Button>
+        <Link href="/dashboard/usuarios/novo">
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            Novo Usuário
+          </Button>
+        </Link>
       </div>
 
       <div className="flex items-center gap-2">
@@ -163,7 +98,6 @@ export default function UsuariosPage() {
             <TableRow>
               <TableHead>Usuário</TableHead>
               <TableHead>Cargo</TableHead>
-              <TableHead>Empresa</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
@@ -188,14 +122,12 @@ export default function UsuariosPage() {
                     {usuario.tipousuario}
                   </div>
                 </TableCell>
-                <TableCell>{usuario.empresa}</TableCell>
                 <TableCell>
                   <div
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                      usuario.ativo
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${usuario.ativo
                         ? "bg-emerald-100 text-emerald-800"
                         : "bg-gray-100 text-gray-800"
-                    }`}
+                      }`}
                   >
                     {usuario.ativo ? "Ativo" : "Inativo"}
                   </div>
@@ -212,15 +144,15 @@ export default function UsuariosPage() {
                         <Shield className="h-4 w-4 mr-2" />
                         Ver detalhes
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          router.push(`/dashboard/usuarios/${usuario.codigo}/editar`)
+                        }
+                      >
                         <Pencil className="h-4 w-4 mr-2" />
                         Editar
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-red-600">
-                        <Trash className="h-4 w-4 mr-2" />
-                        Excluir
-                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
