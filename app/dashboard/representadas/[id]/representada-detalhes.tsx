@@ -36,10 +36,10 @@ import {
   FileText
 } from "lucide-react";
 
-export function RepresentadaDetalhes() {
+export function RepresentadaDetalhes({ id }: { id: string }) {
   const router = useRouter();
   const params = useParams();
-  const representadaId = Number(params.id);
+  const representadaId = Number(id);
   const [deleteLoading, setDeleteLoading] = useState(false);
   
   interface Representada {

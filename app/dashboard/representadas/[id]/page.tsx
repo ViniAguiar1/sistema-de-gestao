@@ -1,12 +1,11 @@
-import { RepresentadaDetalhes } from "./representada-detalhes";
-import { representadasData } from "./data";
+"use client";
 
-export function generateStaticParams() {
-  return representadasData.map((representada) => ({
-    id: representada.id.toString(),
-  }));
-}
+import { RepresentadaDetalhes } from "./representada-detalhes";
+import { useParams } from "next/navigation";
 
 export default function RepresentadaDetalhesPage() {
-  return <RepresentadaDetalhes />;
+  const params = useParams();
+  const id = params.id as string;
+
+  return <RepresentadaDetalhes id={id} />;
 }
