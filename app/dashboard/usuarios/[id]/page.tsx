@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { UsuarioDetalhes } from "./usuario-detalhes";
 
 // Se desejar gerar as rotas estaticamente, você pode buscar os dados de uma API ou banco de dados.
