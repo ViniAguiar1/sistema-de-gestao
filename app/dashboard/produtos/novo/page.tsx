@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
   CardFooter,
@@ -22,31 +21,15 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Building2, Package, DollarSign, Ruler, Box, Scale, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Package, DollarSign, Box, Image as ImageIcon } from "lucide-react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Checkbox } from "@/components/ui/checkbox";
 
-const representadas = [
-  { id: 1, nome: "Xalingo Brinquedos" },
-  { id: 2, nome: "Athia Heroes" },
-  { id: 3, nome: "Brasil Fit" },
-  { id: 4, nome: "Sinteplast" },
-  { id: 5, nome: "Patta" },
-];
-
-const categorias = [
-  "Brinquedos",
-  "Games",
-  "Fitness",
-  "Tintas",
-  "Calçados",
-];
-
-const unidadesMedida = [
-  "Unidade",
-  "Caixa",
-  "Metro",
-  "Litro",
-  "Quilograma",
-];
+interface Representada {
+  codigo: number;
+  nomeFantasia: string;
+}
 
 export default function NovoProdutoPage() {
   const router = useRouter();
@@ -54,16 +37,42 @@ export default function NovoProdutoPage() {
   const [precoCompra, setPrecoCompra] = useState<number>(0);
   const [markup, setMarkup] = useState<number>(2);
   const [margemLucro, setMargemLucro] = useState<number>(0);
+  const [selectedRepresentada, setSelectedRepresentada] = useState<string>("");
+  const [representadas, setRepresentadas] = useState<Representada[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [ativo, setAtivo] = useState(true);
+  const [descontinuado, setDescontinuado] = useState(0);
+  const [aDescontinuar, setADescontinuar] = useState(0);
 
-  // Calcula a margem de lucro baseada no preço de compra e markup
+  useEffect(() => {
+    const fetchRepresentadas = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const response = await fetch("https://apicloud.tavrus.com.br/api/representadas", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Erro ao buscar representadas");
+        }
+        const data = await response.json();
+        setRepresentadas(data);
+      } catch (error) {
+        console.error("Erro ao buscar representadas:", error);
+        toast.error("Erro ao carregar representadas");
+      }
+    };
+
+    fetchRepresentadas();
+  }, []);
+
   const calcularMargemLucro = (precoCompra: number, markup: number) => {
     const precoVenda = precoCompra * markup;
     return ((precoVenda - precoCompra) / precoVenda) * 100;
   };
 
-  // Atualiza a margem de lucro quando preço de compra ou markup mudam
   const handlePrecoCompraChange = (value: string) => {
     const preco = parseFloat(value) || 0;
     setPrecoCompra(preco);
@@ -77,7 +86,7 @@ export default function NovoProdutoPage() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files?.[0]) {
       setSelectedFile(e.target.files[0]);
     }
   };
@@ -88,20 +97,88 @@ export default function NovoProdutoPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    const formData = new FormData();
+    const formElement = e.currentTarget;
+
+    // Adicionando todos os campos ao FormData
+    formData.append("nome", formElement.nome.value);
+    formData.append("sku", formElement.sku.value);
+    formData.append("precoVenda", formElement.precoVenda.value);
+    formData.append("precoPromocao", formElement.precoPromocao.value || "0");
+    formData.append("quantidade", formElement.quantidade?.value || "0");
+    formData.append("ncm", formElement.ncm.value);
+    formData.append("marca", formElement.marca.value);
+    formData.append("coresDisponiveis", formElement.cores.value);
+    formData.append("precoCompra", precoCompra.toString());
+    formData.append("markupMultiplicador", markup.toString());
+    formData.append("margemLucro", margemLucro.toString());
+    formData.append("margemSeguranca", formElement.margemSeguranca.value || "0");
+    formData.append("margemLucroMinima", formElement.margemMinima.value || "0");
+    formData.append("custoMedio", formElement.custoMedio.value || "0");
+    formData.append("ipi", formElement.ipi.value || "0");
+    formData.append("categoria", formElement.categoria.value);
+    formData.append("unidadeMedida", formElement.unidadeMedida.value);
+    formData.append("tabelaPreco", formElement.tabelaPreco.value);
+    formData.append("alturaUnidade", formElement.altura.value || "0");
+    formData.append("larguraUnidade", formElement.largura.value || "0");
+    formData.append("comprimentoUnidade", formElement.comprimento.value || "0");
+    formData.append("pesoLiquido", formElement.peso.value || "0");
+    formData.append("fatorCubagem", formElement.fatorCubagem.value || "0");
+    formData.append("fatorEmbalagem", formElement.fatorEmbalagem.value || "0");
+    formData.append("codigoOriginal", formElement.codigoOriginal.value);
+    formData.append("referencia", formElement.referencia.value);
+    formData.append("modelo", formElement.modelo.value);
+    formData.append("referenciaAgrupamento", formElement.referenciaAgrupamento.value);
+    formData.append("icms", formElement.icms.value || "0");
+    formData.append("status", formElement.status.value);
+    formData.append("observacoes", formElement.observacoes.value);
+    formData.append("lixeira", "0");
+    formData.append("ativo", ativo ? "1" : "0");
+    formData.append("descontinuado", "0");
+    formData.append("aDescontinuar", "0");
+    formData.append("representada", selectedRepresentada);
+
+    if (selectedFile) {
+      formData.append("foto", selectedFile);
+    }
+
+    // Log detalhado dos dados antes do envio
+    console.log('Dados do FormData:');
+    const formDataObj: Record<string, any> = {};
+    for (let [key, value] of formData.entries()) {
+      formDataObj[key] = value;
+      console.log(`${key}: ${value}`);
+    }
+    console.log('Objeto completo:', formDataObj);
+
     try {
-      // Aqui vai a lógica de submissão
-      const formData = new FormData();
-      if (selectedFile) {
-        formData.append("file", selectedFile);
+      const response = await fetch("https://apicloud.tavrus.com.br/api/produtos", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao criar produto");
       }
-      // Adicione outros campos ao formData conforme necessário
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      router.push('/dashboard/produtos');
+
+      toast.success("Produto criado com sucesso!");
+      router.push("/dashboard/produtos");
     } catch (error) {
-      console.error('Erro ao criar produto:', error);
+      console.error("Erro ao criar produto:", error);
+      toast.error("Erro ao criar produto");
     } finally {
       setLoading(false);
     }
@@ -132,14 +209,14 @@ export default function NovoProdutoPage() {
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="representada">Indústria (Representada)</Label>
-                <Select>
+                <Select value={selectedRepresentada} onValueChange={setSelectedRepresentada}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione a representada" />
                   </SelectTrigger>
                   <SelectContent>
                     {representadas.map((representada) => (
-                      <SelectItem key={representada.id} value={representada.id.toString()}>
-                        {representada.nome}
+                      <SelectItem key={representada.codigo} value={representada.codigo.toString()}>
+                        {representada.nomeFantasia}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -149,11 +226,11 @@ export default function NovoProdutoPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="sku">SKU</Label>
-                  <Input id="sku" placeholder="Código do produto" required />
+                  <Input id="sku" name="sku" placeholder="Código do produto" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="nome">Nome do produto</Label>
-                  <Input id="nome" placeholder="Nome do produto" required />
+                  <Input id="nome" name="nome" placeholder="Nome do produto" required />
                 </div>
               </div>
 
@@ -163,10 +240,11 @@ export default function NovoProdutoPage() {
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input 
-                      id="precoVenda" 
-                      type="number" 
-                      step="0.01" 
-                      className="pl-9" 
+                      id="precoVenda"
+                      name="precoVenda"
+                      type="number"
+                      step="0.01"
+                      className="pl-9"
                       required 
                     />
                   </div>
@@ -176,10 +254,11 @@ export default function NovoProdutoPage() {
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input 
-                      id="precoPromocao" 
-                      type="number" 
-                      step="0.01" 
-                      className="pl-9" 
+                      id="precoPromocao"
+                      name="precoPromocao"
+                      type="number"
+                      step="0.01"
+                      className="pl-9"
                     />
                   </div>
                 </div>
@@ -188,17 +267,17 @@ export default function NovoProdutoPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="ncm">NCM (Mercosul)</Label>
-                  <Input id="ncm" placeholder="Código NCM" required />
+                  <Input id="ncm" name="ncm" placeholder="Código NCM" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="marca">Marca do produto</Label>
-                  <Input id="marca" placeholder="Marca" required />
+                  <Input id="marca" name="marca" placeholder="Marca" required />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="cores">Cores disponíveis</Label>
-                <Input id="cores" placeholder="Ex: Vermelho, Azul, Verde" />
+                <Input id="cores" name="cores" placeholder="Ex: Vermelho, Azul, Verde" />
               </div>
             </CardContent>
           </Card>
@@ -218,9 +297,10 @@ export default function NovoProdutoPage() {
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input 
-                      id="precoCompra" 
-                      type="number" 
-                      step="0.01" 
+                      id="precoCompra"
+                      name="precoCompra"
+                      type="number"
+                      step="0.01"
                       className="pl-9"
                       value={precoCompra || ''}
                       onChange={(e) => handlePrecoCompraChange(e.target.value)}
@@ -231,8 +311,9 @@ export default function NovoProdutoPage() {
                 <div className="space-y-2">
                   <Label htmlFor="markup">Markup multiplicador</Label>
                   <Input 
-                    id="markup" 
-                    type="number" 
+                    id="markup"
+                    name="markup"
+                    type="number"
                     step="0.01"
                     value={markup || ''}
                     onChange={(e) => handleMarkupChange(e.target.value)}
@@ -245,8 +326,9 @@ export default function NovoProdutoPage() {
                 <div className="space-y-2">
                   <Label htmlFor="margemLucro">Margem de lucro (%)</Label>
                   <Input 
-                    id="margemLucro" 
-                    type="number" 
+                    id="margemLucro"
+                    name="margemLucro"
+                    type="number"
                     step="0.01"
                     value={margemLucro.toFixed(2)}
                     readOnly 
@@ -255,17 +337,19 @@ export default function NovoProdutoPage() {
                 <div className="space-y-2">
                   <Label htmlFor="margemSeguranca">Margem de segurança</Label>
                   <Input 
-                    id="margemSeguranca" 
-                    type="number" 
-                    step="0.01" 
+                    id="margemSeguranca"
+                    name="margemSeguranca"
+                    type="number"
+                    step="0.01"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="margemMinima">Margem de lucro mínima</Label>
                   <Input 
-                    id="margemMinima" 
-                    type="number" 
-                    step="0.01" 
+                    id="margemMinima"
+                    name="margemMinima"
+                    type="number"
+                    step="0.01"
                   />
                 </div>
               </div>
@@ -273,9 +357,10 @@ export default function NovoProdutoPage() {
               <div className="space-y-2">
                 <Label htmlFor="custoMedio">Cálculo do custo médio</Label>
                 <Input 
-                  id="custoMedio" 
-                  type="number" 
-                  step="0.01" 
+                  id="custoMedio"
+                  name="custoMedio"
+                  type="number"
+                  step="0.01"
                 />
               </div>
             </CardContent>
@@ -294,19 +379,20 @@ export default function NovoProdutoPage() {
                 <div className="space-y-2">
                   <Label htmlFor="ipi">IPI (%)</Label>
                   <Input 
-                    id="ipi" 
-                    type="number" 
-                    step="0.01" 
+                    id="ipi"
+                    name="ipi"
+                    type="number"
+                    step="0.01"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="unidadeMedida">Unidade de medida</Label>
-                  <Select>
+                  <Select name="unidadeMedida">
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
                     <SelectContent>
-                      {unidadesMedida.map((unidade) => (
+                      {["Unidade", "Caixa", "Metro", "Litro", "Quilograma"].map((unidade) => (
                         <SelectItem key={unidade} value={unidade}>
                           {unidade}
                         </SelectItem>
@@ -315,38 +401,57 @@ export default function NovoProdutoPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="embalagem">Embalagem</Label>
-                  <Input id="embalagem" />
+                  <Label htmlFor="categoria">Categoria</Label>
+                  <Input 
+                    id="categoria"
+                    name="categoria"
+                    placeholder="Digite a categoria"
+                  />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tabelaPreco">Tabela de preço</Label>
+                <Select name="tabelaPreco">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="padrao">Tabela Padrão</SelectItem>
+                    <SelectItem value="promocional">Tabela Promocional</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="categoria">Categoria</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categorias.map((categoria) => (
-                        <SelectItem key={categoria} value={categoria}>
-                          {categoria}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tabelaPreco">Tabela de preço</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="padrao">Tabela Padrão</SelectItem>
-                      <SelectItem value="promocional">Tabela Promocional</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label>Status do Produto</Label>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="ativo"
+                        checked={ativo}
+                        onCheckedChange={(checked) => setAtivo(checked as boolean)}
+                      />
+                      <Label htmlFor="ativo">Ativo</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="descontinuado"
+                        checked={descontinuado === 1}
+                        onCheckedChange={(checked) => setDescontinuado(checked ? 1 : 0)}
+                      />
+                      <Label htmlFor="descontinuado">Descontinuado</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="aDescontinuar"
+                        checked={aDescontinuar === 1}
+                        onCheckedChange={(checked) => setADescontinuar(checked ? 1 : 0)}
+                      />
+                      <Label htmlFor="aDescontinuar">A Descontinuar</Label>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -358,65 +463,37 @@ export default function NovoProdutoPage() {
                   <div className="space-y-2">
                     <Label htmlFor="altura">Altura (m)</Label>
                     <Input 
-                      id="altura" 
-                      type="number" 
-                      step="0.01" 
+                      id="altura"
+                      name="altura"
+                      type="number"
+                      step="0.01"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="largura">Largura (m)</Label>
                     <Input 
-                      id="largura" 
-                      type="number" 
-                      step="0.01" 
+                      id="largura"
+                      name="largura"
+                      type="number"
+                      step="0.01"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="comprimento">Comprimento (m)</Label>
                     <Input 
-                      id="comprimento" 
-                      type="number" 
-                      step="0.01" 
+                      id="comprimento"
+                      name="comprimento"
+                      type="number"
+                      step="0.01"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="peso">Peso líquido (kg)</Label>
                     <Input 
-                      id="peso" 
-                      type="number" 
-                      step="0.01" 
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-4">
-                <h4 className="font-medium">Dimensões da Caixa Master</h4>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="alturaMaster">Altura</Label>
-                    <Input 
-                      id="alturaMaster" 
-                      type="number" 
-                      step="0.01" 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="larguraMaster">Largura</Label>
-                    <Input 
-                      id="larguraMaster" 
-                      type="number" 
-                      step="0.01" 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="comprimentoMaster">Comprimento</Label>
-                    <Input 
-                      id="comprimentoMaster" 
-                      type="number" 
-                      step="0.01" 
+                      id="peso"
+                      name="peso"
+                      type="number"
+                      step="0.01"
                     />
                   </div>
                 </div>
@@ -426,25 +503,28 @@ export default function NovoProdutoPage() {
                 <div className="space-y-2">
                   <Label htmlFor="fatorCubagem">Fator cubagem</Label>
                   <Input 
-                    id="fatorCubagem" 
-                    type="number" 
-                    step="0.01" 
+                    id="fatorCubagem"
+                    name="fatorCubagem"
+                    type="number"
+                    step="0.01"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="fatorEmbalagem">Fator embalagem</Label>
                   <Input 
-                    id="fatorEmbalagem" 
-                    type="number" 
-                    step="0.01" 
+                    id="fatorEmbalagem"
+                    name="fatorEmbalagem"
+                    type="number"
+                    step="0.01"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="espessura">Espessura</Label>
+                  <Label htmlFor="quantidade">Quantidade</Label>
                   <Input 
-                    id="espessura" 
-                    type="number" 
-                    step="0.01" 
+                    id="quantidade"
+                    name="quantidade"
+                    type="number"
+                    step="1"
                   />
                 </div>
               </div>
@@ -452,43 +532,43 @@ export default function NovoProdutoPage() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="codigoOriginal">Código original</Label>
-                  <Input id="codigoOriginal" />
+                  <Input id="codigoOriginal" name="codigoOriginal" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="referencia">Referência</Label>
-                  <Input id="referencia" />
+                  <Input id="referencia" name="referencia" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="modelo">Modelo</Label>
-                  <Input id="modelo" />
+                  <Input id="modelo" name="modelo" />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="referenciaAgrupamento">Referência de agrupamento</Label>
-                  <Input id="referenciaAgrupamento" />
+                  <Input id="referenciaAgrupamento" name="referenciaAgrupamento" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="icms">ICMS (%)</Label>
                   <Input 
-                    id="icms" 
-                    type="number" 
-                    step="0.01" 
+                    id="icms"
+                    name="icms"
+                    type="number"
+                    step="0.01"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Select>
+                <Select name="status">
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ativo">Ativo</SelectItem>
-                    <SelectItem value="inativo">Inativo</SelectItem>
-                    <SelectItem value="promocao">Em Promoção</SelectItem>
+                    <SelectItem value="1">Ativo</SelectItem>
+                    <SelectItem value="0">Inativo</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -515,6 +595,7 @@ export default function NovoProdutoPage() {
                     ref={fileInputRef}
                     onChange={handleFileChange}
                     className="hidden"
+                    accept="image/*"
                   />
                 </div>
               </div>
@@ -523,6 +604,7 @@ export default function NovoProdutoPage() {
                 <Label htmlFor="observacoes">Observações</Label>
                 <Textarea 
                   id="observacoes"
+                  name="observacoes"
                   placeholder="Observações adicionais sobre o produto"
                   className="min-h-[100px]"
                 />

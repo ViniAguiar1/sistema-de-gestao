@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,8 +38,8 @@ import {
   Tag,
   CreditCard
 } from "lucide-react";
-import Link from "next/link";
-import { clientesData } from "./data";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function LoadingSkeleton() {
   return (
@@ -68,32 +68,102 @@ function LoadingSkeleton() {
   );
 }
 
+interface Cliente {
+  codigo: number;
+  razaoSocial: string;
+  nomeFantasia: string;
+  cnpj: string;
+  inscricaoEstadual: string;
+  matriz: string;
+  redeCliente: string;
+  limiteCredito: number;
+  tipoContribuinte: string;
+  endereco: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
+  cep: string;
+  cidade: string;
+  estado: string;
+  telefonePrincipal: string;
+  fax: string;
+  telefoneAdicional: string;
+  emailPrincipal: string;
+  emailFinanceiro: string;
+  website: string;
+  instagram: string;
+  facebook: string;
+  status: string;
+  classificacaoSV: string;
+  formaPagamento: string;
+  vendedor: string;
+  categoria: string;
+  observacoes: string;
+}
+
 export function ClienteDetalhes() {
   const router = useRouter();
   const params = useParams();
-  const clienteId = Number(params.id);
+  const clienteId = params.id as string;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [cliente, setCliente] = useState<Cliente | null>(null);
 
-  // Find client details
-  const clienteDetalhes = clientesData.find(c => c.id === clienteId);
+  useEffect(() => {
+    const fetchCliente = async () => {
+      const token = localStorage.getItem("token");
+      
+      if (!token) {
+        router.push("/login");
+        return;
+      }
 
-  // Simulate loading
-  useState(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  });
+      try {
+        const response = await fetch(`https://apicloud.tavrus.com.br/api/empresas-pessoas/${clienteId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Erro ao buscar dados do cliente");
+        }
+
+        const data = await response.json();
+        setCliente(data);
+      } catch (error) {
+        console.error("Erro ao buscar cliente:", error);
+        setError("Erro ao carregar dados do cliente");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCliente();
+  }, [clienteId, router]);
 
   const handleDelete = async () => {
     setDeleteLoading(true);
+    const token = localStorage.getItem("token");
+
     try {
-      // Aqui iria a lógica de deleção
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      router.push('/dashboard/clientes');
-    } catch (err) {
-      setError('Erro ao excluir o cliente. Tente novamente.');
+      const response = await fetch(`https://apicloud.tavrus.com.br/api/empresas-pessoas/${clienteId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao excluir o cliente");
+      }
+
+      toast.success("Cliente excluído com sucesso!");
+      router.push("/dashboard/clientes");
+    } catch (error) {
+      console.error("Erro ao excluir cliente:", error);
+      toast.error("Erro ao excluir o cliente");
     } finally {
       setDeleteLoading(false);
     }
@@ -119,7 +189,7 @@ export function ClienteDetalhes() {
     );
   }
 
-  if (!clienteDetalhes) {
+  if (!cliente) {
     return (
       <div className="flex-1 space-y-4 p-8 pt-6">
         <Card>
@@ -188,37 +258,37 @@ export function ClienteDetalhes() {
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Razão Social</h4>
-                <p>{clienteDetalhes.razaoSocial}</p>
+                <p>{cliente.razaoSocial}</p>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Nome Fantasia</h4>
-                <p>{clienteDetalhes.nomeFantasia}</p>
+                <p>{cliente.nomeFantasia}</p>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-6">
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">CNPJ</h4>
-                <p>{clienteDetalhes.cnpj}</p>
+                <p>{cliente.cnpj}</p>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Inscrição Estadual</h4>
-                <p>{clienteDetalhes.inscricaoEstadual}</p>
+                <p>{cliente.inscricaoEstadual}</p>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Matriz/Filial</h4>
-                <p>{clienteDetalhes.matriz}</p>
+                <p>{cliente.matriz}</p>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-6">
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Rede de Cliente</h4>
-                <p>{clienteDetalhes.redeCliente}</p>
+                <p>{cliente.redeCliente}</p>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Limite de Crédito</h4>
                 <p className="flex items-center gap-1">
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  {clienteDetalhes.limiteCredito.toLocaleString('pt-BR', {
+                  {cliente.limiteCredito.toLocaleString('pt-BR', {
                     style: 'currency',
                     currency: 'BRL'
                   })}
@@ -226,7 +296,7 @@ export function ClienteDetalhes() {
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Tipo de Contribuinte</h4>
-                <p>{clienteDetalhes.tipoContribuinte}</p>
+                <p>{cliente.tipoContribuinte}</p>
               </div>
             </div>
           </CardContent>
@@ -244,29 +314,29 @@ export function ClienteDetalhes() {
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Endereço</h4>
-                <p>{clienteDetalhes.endereco}, {clienteDetalhes.numero}</p>
+                <p>{cliente.endereco}, {cliente.numero}</p>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Complemento</h4>
-                <p>{clienteDetalhes.complemento}</p>
+                <p>{cliente.complemento}</p>
               </div>
             </div>
             <div className="grid grid-cols-4 gap-6">
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Bairro</h4>
-                <p>{clienteDetalhes.bairro}</p>
+                <p>{cliente.bairro}</p>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">CEP</h4>
-                <p>{clienteDetalhes.cep}</p>
+                <p>{cliente.cep}</p>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Cidade</h4>
-                <p>{clienteDetalhes.cidade}</p>
+                <p>{cliente.cidade}</p>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Estado</h4>
-                <p>{clienteDetalhes.estado}</p>
+                <p>{cliente.estado}</p>
               </div>
             </div>
           </CardContent>
@@ -286,16 +356,16 @@ export function ClienteDetalhes() {
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Telefone</h4>
                 <p className="flex items-center gap-1">
                   <Phone className="h-4 w-4 text-muted-foreground" />
-                  {clienteDetalhes.telefone}
+                  {cliente.telefonePrincipal}
                 </p>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Fax</h4>
-                <p>{clienteDetalhes.fax}</p>
+                <p>{cliente.fax}</p>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Telefone Adicional</h4>
-                <p>{clienteDetalhes.telefoneAdicional}</p>
+                <p>{cliente.telefoneAdicional}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-6">
@@ -303,14 +373,14 @@ export function ClienteDetalhes() {
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Email</h4>
                 <p className="flex items-center gap-1">
                   <Mail className="h-4 w-4 text-muted-foreground" />
-                  {clienteDetalhes.email}
+                  {cliente.emailPrincipal}
                 </p>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Email Financeiro</h4>
                 <p className="flex items-center gap-1">
                   <Mail className="h-4 w-4 text-muted-foreground" />
-                  {clienteDetalhes.emailFinanceiro}
+                  {cliente.emailFinanceiro}
                 </p>
               </div>
             </div>
@@ -319,24 +389,26 @@ export function ClienteDetalhes() {
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Website</h4>
                 <p className="flex items-center gap-1">
                   <Globe className="h-4 w-4 text-muted-foreground" />
-                  <a
-                    href={`https://${clienteDetalhes.website}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline flex items-center gap-1"
-                  >
-                    {clienteDetalhes.website}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
+                  {cliente.website && (
+                    <a
+                      href={`https://${cliente.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline flex items-center gap-1"
+                    >
+                      {cliente.website}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
                 </p>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Instagram</h4>
-                <p>{clienteDetalhes.instagram}</p>
+                <p>{cliente.instagram}</p>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Facebook</h4>
-                <p>{clienteDetalhes.facebook}</p>
+                <p>{cliente.facebook}</p>
               </div>
             </div>
           </CardContent>
@@ -354,25 +426,26 @@ export function ClienteDetalhes() {
             <div className="grid grid-cols-3 gap-6">
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Status</h4>
-                <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${clienteDetalhes.status === 'Ativo'
+                <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                  cliente.status === 'Ativo'
                     ? 'bg-emerald-100 text-emerald-800'
                     : 'bg-gray-100 text-gray-800'
-                  }`}>
-                  {clienteDetalhes.status}
+                }`}>
+                  {cliente.status}
                 </div>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Classificação SV</h4>
                 <p className="flex items-center gap-1">
                   <Tag className="h-4 w-4 text-muted-foreground" />
-                  {clienteDetalhes.classificacaoSV}
+                  {cliente.classificacaoSV}
                 </p>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-2">Forma de Pagamento</h4>
                 <p className="flex items-center gap-1">
                   <CreditCard className="h-4 w-4 text-muted-foreground" />
-                  {clienteDetalhes.formaPagamento}
+                  {cliente.formaPagamento}
                 </p>
               </div>
             </div>
@@ -380,12 +453,12 @@ export function ClienteDetalhes() {
               <h4 className="font-medium text-sm text-muted-foreground mb-2">Vendedor</h4>
               <p className="flex items-center gap-1">
                 <Users className="h-4 w-4 text-muted-foreground" />
-                {clienteDetalhes.vendedor}
+                {cliente.vendedor}
               </p>
             </div>
             <div>
               <h4 className="font-medium text-sm text-muted-foreground mb-2">Categoria</h4>
-              <p>{clienteDetalhes.categoria}</p>
+              <p>{cliente.categoria}</p>
             </div>
           </CardContent>
         </Card>
@@ -399,7 +472,7 @@ export function ClienteDetalhes() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground">{clienteDetalhes.observacoes}</p>
+            <p className="text-muted-foreground">{cliente.observacoes}</p>
           </CardContent>
         </Card>
       </div>

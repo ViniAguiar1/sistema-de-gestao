@@ -1,12 +1,11 @@
-import { ClienteDetalhes } from "./cliente-detalhes";
-import { clientesData } from "./data";
+"use client";
 
-export function generateStaticParams() {
-  return clientesData.map((cliente) => ({
-    id: cliente.id.toString(),
-  }));
-}
+import { ClienteDetalhes } from "./cliente-detalhes";
+import { useParams } from "next/navigation";
 
 export default function ClienteDetalhesPage() {
+  const params = useParams();
+  const id = params.id as string;
+
   return <ClienteDetalhes />;
 }

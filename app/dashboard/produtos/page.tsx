@@ -19,8 +19,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, MoreHorizontal, Package, Tag, Building2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Plus, Search, MoreHorizontal, Package, Tag, Building2, Pencil, Trash2, Eye } from "lucide-react";
 import Link from "next/link";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const statusStyles = {
   Ativo: "bg-emerald-100 text-emerald-800",
@@ -38,13 +57,14 @@ export default function ProdutosPage() {
   const router = useRouter();
 
   // Estado para guardar os produtos vindos da API
-  const [produtos, setProdutos] = useState([]);
+  const [produtos, setProdutos] = useState<{ codigo: number; nome: string; sku: string; categoria: string; precoCompra: number; quantidade: string; representada: string; status: number; }[]>([]);
   // Estado para guardar as representadas vindas da API
-  const [representadasData, setRepresentadasData] = useState([]);
+  const [representadasData, setRepresentadasData] = useState<{ codigo: number; razaoSocial: string; }[]>([]);
   
   // Estados para filtro de busca e representada
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRepresentada, setSelectedRepresentada] = useState(null);
+  const [selectedRepresentada, setSelectedRepresentada] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Buscar dados da API de produtos
   useEffect(() => {
@@ -92,6 +112,42 @@ export default function ProdutosPage() {
     fetchRepresentadas();
   }, []);
 
+  // Função para excluir produto
+  const handleDelete = async (produtoId: number) => {
+    setDeleteLoading(true);
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch(`https://apicloud.tavrus.com.br/api/produtos/${produtoId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao excluir o produto");
+      }
+
+      setProdutos(produtos.filter(produto => produto.codigo !== produtoId));
+      toast.success("Produto excluído com sucesso!");
+    } catch (error) {
+      console.error("Erro ao excluir produto:", error);
+      toast.error("Erro ao excluir o produto");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  // Filtrar produtos com base no termo de busca e representada selecionada
+  const filteredProdutos = produtos.filter((produto) => {
+    const matchesSearchTerm = produto.nome.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRepresentada = selectedRepresentada
+      ? representadasData.find((r) => r.razaoSocial === selectedRepresentada)?.codigo === Number(produto.representada)
+      : true;
+    return matchesSearchTerm && matchesRepresentada;
+  });
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
@@ -115,7 +171,7 @@ export default function ProdutosPage() {
           />
         </div>
         <Select
-          value={selectedRepresentada || "todas"}
+          value={selectedRepresentada ?? "todas"}
           onValueChange={(value) => setSelectedRepresentada(value === "todas" ? null : value)}
         >
           <SelectTrigger className="w-[200px]">
@@ -145,15 +201,14 @@ export default function ProdutosPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {produtos.map((produto) => {
-              const statusLabel = statusMapping[produto.status] || "Desconhecido";
-              // Converte produto.representada para número e procura na API utilizando "codigo"
+            {filteredProdutos.map((produto) => {
+              const statusLabel = statusMapping[produto.status as keyof typeof statusMapping] || "Desconhecido";
               const representadaId = Number(produto.representada);
               const representadaEncontrada = representadasData.find(
                 (r) => r.codigo === representadaId
               );
               return (
-                <TableRow key={produto.id}>
+                <TableRow key={produto.codigo}>
                   <TableCell>
                     <div>
                       <p className="font-medium">{produto.nome}</p>
@@ -179,7 +234,7 @@ export default function ProdutosPage() {
                   </TableCell>
                   <TableCell>
                     <div className="font-medium">
-                      {produto.estoque} unidades
+                      <div>{parseInt(produto.quantidade, 10)} unidades</div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -193,16 +248,55 @@ export default function ProdutosPage() {
                   <TableCell>
                     <div
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                        statusStyles[statusLabel] || ""
+                        statusStyles[statusLabel as keyof typeof statusStyles] || ""
                       }`}
                     >
                       {statusLabel}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="icon">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/produtos/${produto.codigo}`)}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          Ver detalhes
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/produtos/${produto.codigo}/editar`)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Editar
+                        </DropdownMenuItem>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(produto.codigo)}
+                                disabled={deleteLoading}
+                              >
+                                {deleteLoading ? "Excluindo..." : "Excluir"}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               );
